@@ -25,9 +25,9 @@ class MoviesCollectionViewCell: UICollectionViewCell {
     }
     
     // MARK: - Properties
-    lazy var roundedBackgroundView: UIView = {
+    lazy var cellView: UIView = {
         let view = UIView()
-        view.layer.cornerRadius = 10
+        //view.layer.cornerRadius = 10
         view.layer.borderColor = UIColor.systemGray.cgColor
         view.layer.borderWidth = 1
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -37,28 +37,77 @@ class MoviesCollectionViewCell: UICollectionViewCell {
     
     lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "HelveticaNeue", size: 20)
-        label.textColor = .systemBlue
+        //label.font = UIFont(name: "HelveticaNeue", size: 18)
+        
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.textColor = UIColor(red: 247/255, green: 206/255, blue: 91/255, alpha: 1)
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.sizeToFit()
+        label.numberOfLines = 2
         return label
+    }()
+    
+    lazy var viewTitleMovie: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(red: 45/255, green: 48/255, blue: 71/255, alpha: 1)
+        return view
+    }()
+    
+    lazy var movieImage: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = UIView.ContentMode.scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    lazy var favoriteIconImage: UIImageView = {
+        let image = UIImage(named: "favorite_gray_icon")
+        let imageView = UIImageView()
+        imageView.image = image
+        imageView.contentMode = UIView.ContentMode.scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
     
 }
 
 // MARK: - UI Setup
 extension MoviesCollectionViewCell {
+    
     private func setupUI() {
-        self.backgroundColor = .gray
-        self.contentView.addSubview(roundedBackgroundView)
-        roundedBackgroundView.addSubview(titleLabel)
+        
+        self.contentView.addSubview(cellView)
+        cellView.addSubview(movieImage)
+        cellView.addSubview(viewTitleMovie)
+        viewTitleMovie.addSubview(titleLabel)
+        viewTitleMovie.addSubview(favoriteIconImage)
         
         NSLayoutConstraint.activate([
-            roundedBackgroundView.topAnchor.constraint(equalTo: self.topAnchor, constant: 5),
-            roundedBackgroundView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -5),
-            roundedBackgroundView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 5),
-            roundedBackgroundView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -5),
-            titleLabel.centerXAnchor.constraint(equalTo: roundedBackgroundView.centerXAnchor),
-            titleLabel.centerYAnchor.constraint(equalTo: roundedBackgroundView.centerYAnchor)
+            cellView.topAnchor.constraint(equalTo: self.topAnchor),
+            cellView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            cellView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            cellView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            
+            viewTitleMovie.bottomAnchor.constraint(equalTo: cellView.bottomAnchor),
+            viewTitleMovie.leadingAnchor.constraint(equalTo: cellView.leadingAnchor),
+            viewTitleMovie.trailingAnchor.constraint(equalTo: cellView.trailingAnchor),
+            viewTitleMovie.heightAnchor.constraint(equalToConstant: 50),
+            
+            titleLabel.bottomAnchor.constraint(equalTo: viewTitleMovie.bottomAnchor),
+            titleLabel.topAnchor.constraint(equalTo: viewTitleMovie.topAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: viewTitleMovie.leadingAnchor, constant: 10),
+
+            favoriteIconImage.trailingAnchor.constraint(equalTo: viewTitleMovie.trailingAnchor, constant: -10),
+            favoriteIconImage.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 1),
+            favoriteIconImage.topAnchor.constraint(equalTo: viewTitleMovie.topAnchor, constant: 15),
+            favoriteIconImage.heightAnchor.constraint(equalToConstant: 20),
+            favoriteIconImage.widthAnchor.constraint(equalToConstant: 20),
+
+            movieImage.topAnchor.constraint(equalTo: cellView.topAnchor),
+            movieImage.leadingAnchor.constraint(equalTo: cellView.leadingAnchor),
+            movieImage.trailingAnchor.constraint(equalTo: cellView.trailingAnchor),
+            movieImage.bottomAnchor.constraint(equalTo: viewTitleMovie.topAnchor),
         ])
         
     }

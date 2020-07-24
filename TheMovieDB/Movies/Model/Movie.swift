@@ -9,6 +9,29 @@
 import Foundation
 
 
-struct Movie: Codable {
-     
+struct MovieResponse: Codable {
+    let page: Int
+    let total_results: Int
+    let total_pages: Int
+    let films: [Films]
+    
+    enum CodingKeys: String, CodingKey {
+        case page
+        case total_results
+        case total_pages
+        case films = "results"
+    }
 }
+
+struct Films: Codable {
+    let id: Int
+    let title: String
+    let poster: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case poster = "poster_path"
+    }
+}
+

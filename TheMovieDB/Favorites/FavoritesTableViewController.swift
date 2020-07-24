@@ -57,7 +57,7 @@ extension FavoritesTableViewController {
     
     func setupUINavigationBarController () {
         self.navigationItem.title = "Favorites"
-        self.navigationController?.navigationBar.barTintColor = .systemYellow
+        self.navigationController?.navigationBar.barTintColor = UIColor(red: 247/255, green: 206/255, blue: 91/255, alpha: 1)
     }
 }
 
