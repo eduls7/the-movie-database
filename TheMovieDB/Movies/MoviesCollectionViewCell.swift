@@ -56,15 +56,13 @@ class MoviesCollectionViewCell: UICollectionViewCell {
     
     lazy var movieImage: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = UIView.ContentMode.scaleAspectFit
+        imageView.contentMode = UIView.ContentMode.scaleToFill
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
     lazy var favoriteIconImage: UIImageView = {
-        let image = UIImage(named: "favorite_gray_icon")
         let imageView = UIImageView()
-        imageView.image = image
         imageView.contentMode = UIView.ContentMode.scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -97,9 +95,10 @@ extension MoviesCollectionViewCell {
             titleLabel.bottomAnchor.constraint(equalTo: viewTitleMovie.bottomAnchor),
             titleLabel.topAnchor.constraint(equalTo: viewTitleMovie.topAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: viewTitleMovie.leadingAnchor, constant: 10),
+            
 
             favoriteIconImage.trailingAnchor.constraint(equalTo: viewTitleMovie.trailingAnchor, constant: -10),
-            favoriteIconImage.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 1),
+            favoriteIconImage.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 15),
             favoriteIconImage.topAnchor.constraint(equalTo: viewTitleMovie.topAnchor, constant: 15),
             favoriteIconImage.heightAnchor.constraint(equalToConstant: 20),
             favoriteIconImage.widthAnchor.constraint(equalToConstant: 20),

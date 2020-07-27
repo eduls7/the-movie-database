@@ -9,10 +9,28 @@
 import UIKit
 import Foundation
 
-class MoviesCollectionViewController: UIViewController {
+
+
+class MoviesCollectionViewController: UIViewController, favoriteMovieDelegate {
+    
+    func updateFavoriteImage(movieID: Int) {
+        if let indexPath = selectedIndexPath {
+            if popularMovies[indexPath.row].isFav == true {
+                popularMovies[indexPath.row].isFav = false
+            } else {
+                popularMovies[indexPath.row].isFav = true
+            }
+            collectionView.reloadData()
+        }
+    }
+    
     
     //MARK: - Properties    
-    var popularMovies: [Films] = []
+    var moviesJSON: [Films] = []
+    var genresList: [Genres] = []
+    var popularMovies: [Movie] = []
+    var selectedIndexPath: IndexPath?
+
     
     lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewLayout())
@@ -81,6 +99,8 @@ extension MoviesCollectionViewController {
     }
 }
 
+
+
 // MARK: - UICollectionViewDelegate & Data Source
 extension MoviesCollectionViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
@@ -90,34 +110,70 @@ extension MoviesCollectionViewController: UICollectionViewDelegate, UICollection
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! MoviesCollectionViewCell
+        
         cell.titleLabel.text = popularMovies[indexPath.row].title
         
+        if popularMovies[indexPath.row].isFav {
+            cell.favoriteIconImage.image = UIImage(named: "favorite_full_icon")
+        }else{
+            cell.favoriteIconImage.image = UIImage(named: "favorite_gray_icon")
+        }
         getImageMovies(imageURLString: popularMovies[indexPath.row].poster, imageView: cell.movieImage)
         return cell
     }
     
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let detailMovieViewController = DetailMovieViewController()
+        
+        detailMovieViewController.titleMovieLabel.text = popularMovies[indexPath.row].title
+        
+        detailMovieViewController.releaseDateMovieLabel.text = String(popularMovies[indexPath.row].releaseDate.prefix(4))
+        detailMovieViewController.overviewMovieLabel.text = popularMovies[indexPath.row].overview
+        
+        getImageMovies(imageURLString: popularMovies[indexPath.row].poster, imageView: detailMovieViewController.movieImage)
+        
+        getGenresMovies(genresMoviesID: popularMovies[indexPath.row].genre, genreMovieLabel: detailMovieViewController.genreMovieLabel)
+        
+        collectionView.deselectItem(at: indexPath, animated: true)
+        
+        detailMovieViewController.delegate = self
+        detailMovieViewController.movieID = popularMovies[indexPath.row].id
+        selectedIndexPath = indexPath
+        
+        if popularMovies[indexPath.row].isFav {
+            detailMovieViewController.favoriteButtom.isSelected = true
+        } else {
+            detailMovieViewController.favoriteButtom.isSelected = false
+        }
+        
+        self.navigationController?.pushViewController(detailMovieViewController, animated: true)
+        
+        
+    }
+    
 }
+
 
 extension MoviesCollectionViewController {
     
     //MARK: - NETWORK
     func fetchMovies () {
+        
         let apiKEY = "001b2963f87a5986bb263777245cc788"
         guard let url = URL(string: "https://api.themoviedb.org/3/movie/popular?api_key=\(apiKEY)") else {
             print("URL com problema")
             return
         }
-        
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
         let dataTask: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) in
-            
             if error == nil && data != nil {
                 let decoder = JSONDecoder()
-                
                 do{
                     let filmsResponse = try decoder.decode(MovieResponse.self, from: data!)
-                    self.popularMovies = filmsResponse.films
+                    self.moviesJSON = filmsResponse.films
+                    self.fetchMovies(movieJSON: self.moviesJSON)
                     self.collectionView.reloadData()
                 }
                 catch {
@@ -146,4 +202,84 @@ extension MoviesCollectionViewController {
             }
         }
     }
+    
+    func getGenresMovies (genresMoviesID: [Int], genreMovieLabel: UILabel) {
+        let apiKEY = "001b2963f87a5986bb263777245cc788"
+        guard let url = URL(string: "https://api.themoviedb.org/3/genre/movie/list?api_key=\(apiKEY)") else {
+            print("URL Genre com problema")
+            return
+        }
+        let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
+        let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
+        let dataTask: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) in
+            if error == nil && data != nil {
+                let decoder = JSONDecoder()
+                do{
+                    let genreResponse = try decoder.decode(GenreResponse.self, from: data!)
+                    self.genresList = genreResponse.genres
+                    
+                    var namesGenres: [String] = []
+                    for id in self.genresList {
+                        
+                        for genreID in genresMoviesID {
+                            if id.id == genreID {
+                                namesGenres.append(id.name)
+                                genreMovieLabel.text = namesGenres.joined(separator: ", ")
+                            }
+                        }
+                    }
+                }
+                catch {
+                    print("Error with JSON in Genres parsing")
+                    print(error)
+                }
+            }
+        }
+        
+        dataTask.resume()
+    }
+    
+    func fetchMovies (movieJSON: [Films]) {
+        for movies in movieJSON {
+            let moviesAux = Movie(id: movies.id, title: movies.title, overview: movies.overview, releaseDate: movies.date, poster: movies.poster, genre: movies.genre, isFav: false)
+            
+            self.popularMovies.append(moviesAux)
+            
+        }
+    }
+    
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
