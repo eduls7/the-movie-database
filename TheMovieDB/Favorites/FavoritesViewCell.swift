@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FavoritesTableViewCell: UITableViewCell {
+class FavoritesViewCell: UITableViewCell {
     
     //MARK: Initialazers
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -39,7 +39,7 @@ class FavoritesTableViewCell: UITableViewCell {
 }
 
 //MARK: - UI Setup
-extension FavoritesTableViewCell {
+extension FavoritesViewCell {
     private func setupUI() {
         self.contentView.addSubview(titleLabel)
         

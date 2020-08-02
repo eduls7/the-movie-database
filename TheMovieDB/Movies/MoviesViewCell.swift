@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MoviesCollectionViewCell: UICollectionViewCell {
+class MoviesViewCell: UICollectionViewCell {
     
     // MARK: - Initialization
     override init(frame: CGRect) {
@@ -71,7 +71,7 @@ class MoviesCollectionViewCell: UICollectionViewCell {
 }
 
 // MARK: - UI Setup
-extension MoviesCollectionViewCell {
+extension MoviesViewCell {
     
     private func setupUI() {
         

@@ -10,21 +10,7 @@ import UIKit
 import Foundation
 
 
-
-class MoviesCollectionViewController: UIViewController, favoriteMovieDelegate {
-    
-    func updateFavoriteImage(movieID: Int) {
-        if let indexPath = selectedIndexPath {
-            if popularMovies[indexPath.row].isFav == true {
-                popularMovies[indexPath.row].isFav = false
-            } else {
-                popularMovies[indexPath.row].isFav = true
-            }
-            collectionView.reloadData()
-        }
-    }
-    
-    
+class MoviesViewController: UIViewController {
     //MARK: - Properties    
     var moviesJSON: [Films] = []
     var genresList: [Genres] = []
@@ -50,10 +36,12 @@ class MoviesCollectionViewController: UIViewController, favoriteMovieDelegate {
         fetchMovies()
         setupUI()
     }
+    
+    
 }
 
 // MARK: - UI Setup
-extension MoviesCollectionViewController {
+extension MoviesViewController {
     private func setupUI() {
         
         if #available(iOS 13.6, *) {
@@ -102,7 +90,7 @@ extension MoviesCollectionViewController {
 
 
 // MARK: - UICollectionViewDelegate & Data Source
-extension MoviesCollectionViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return popularMovies.count
@@ -138,7 +126,7 @@ extension MoviesCollectionViewController: UICollectionViewDelegate, UICollection
         collectionView.deselectItem(at: indexPath, animated: true)
         
         detailMovieViewController.delegate = self
-        detailMovieViewController.movieID = popularMovies[indexPath.row].id
+        detailMovieViewController.movie = popularMovies[indexPath.row]
         selectedIndexPath = indexPath
         
         if popularMovies[indexPath.row].isFav {
@@ -154,10 +142,27 @@ extension MoviesCollectionViewController: UICollectionViewDelegate, UICollection
     
 }
 
-
-extension MoviesCollectionViewController {
+//MARK: - Favorite Delegate
+extension MoviesViewController: FavoriteMovieDelegate{
     
-    //MARK: - NETWORK
+    func updateFavoriteImage(movie: Movie) {
+        
+        if let indexPath = selectedIndexPath {
+            
+            if popularMovies[indexPath.row].isFav == true {
+                popularMovies[indexPath.row].isFav = false
+            
+            } else {
+                popularMovies[indexPath.row].isFav = true
+            }
+            collectionView.reloadItems(at: [indexPath])
+        }
+    }
+}
+
+//MARK: - NETWORK
+extension MoviesViewController {
+    
     func fetchMovies () {
         
         let apiKEY = "001b2963f87a5986bb263777245cc788"
@@ -249,6 +254,7 @@ extension MoviesCollectionViewController {
     }
     
 }
+
 
 
 
