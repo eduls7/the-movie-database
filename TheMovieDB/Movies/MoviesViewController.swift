@@ -7,20 +7,33 @@
 //
 
 import UIKit
-import Foundation
+import CoreData
 
-
-class MoviesViewController: UIViewController {
-    //MARK: - Properties    
-    var moviesJSON: [Films] = []
+protocol DataSourceMovieDelegate: class {
+    func insermovie (_ movie: Movie)
+    func removeMovie (_ movie: Movie)
+}
+class MoviesViewController: UIViewController, UnfavoriteMovieRow {
+    
+    
+    
+    
+    //MARK: - Properties
+    var popularMoviesJSON: [Films] = []
     var genresList: [Genres] = []
     var popularMovies: [Movie] = []
     var selectedIndexPath: IndexPath?
-
+    weak var delegate: DataSourceMovieDelegate?
+    var managedContext: NSManagedObjectContext {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        return appDelegate.persistentContainer.viewContext
+    }
+    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Movies")
+    var moviesDB: [NSManagedObject] = []
     
     lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewLayout())
-        collectionView.register(MoviesCollectionViewCell.self, forCellWithReuseIdentifier: "CollectionViewCell")
+        collectionView.register(MoviesViewCell.self, forCellWithReuseIdentifier: "CollectionViewCell")
         collectionView.backgroundColor = .white
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -28,16 +41,50 @@ class MoviesViewController: UIViewController {
         return collectionView
     }()
     
-    
     //MARK: - Initializers
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        fetchMovies()
+        fetchMoviesAPI()
+        fetchMoviesDB()
         setupUI()
     }
     
+    func fetchMoviesDB(){
+        do{
+            moviesDB = try managedContext.fetch(fetchRequest)
+        } catch let error as NSError {
+            print("Could not fetch. \(error), \(error.userInfo)")
+        }
+        
+        print(moviesDB.count)
+    }
     
+    func setupMoviesFavs () {
+        for movieDB in moviesDB {
+            let movieID = movieDB.value(forKeyPath: "id") as? Int
+            var index = 0
+            for popularMovie in popularMovies {
+                if movieID == popularMovie.id {
+                    popularMovies[index].isFav = true
+                    print(popularMovies[index].title)
+                }
+                index += 1
+            }
+            
+        }
+    }
+    
+    func unfavoriteMovie(_ id: Int) {
+        var index = 0
+        for movie in popularMovies {
+            if movie.id == id {
+                popularMovies[index].isFav = false
+                collectionView.reloadData()
+            }
+            index += 1
+        }
+    }
 }
 
 // MARK: - UI Setup
@@ -85,6 +132,7 @@ extension MoviesViewController {
         self.navigationItem.title = "Movies"
         self.navigationController?.navigationBar.barTintColor = UIColor(red: 247/255, green: 206/255, blue: 91/255, alpha: 1)
     }
+    
 }
 
 
@@ -97,7 +145,8 @@ extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! MoviesCollectionViewCell
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! MoviesViewCell
         
         cell.titleLabel.text = popularMovies[indexPath.row].title
         
@@ -106,28 +155,28 @@ extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSo
         }else{
             cell.favoriteIconImage.image = UIImage(named: "favorite_gray_icon")
         }
+        
         getImageMovies(imageURLString: popularMovies[indexPath.row].poster, imageView: cell.movieImage)
         return cell
     }
     
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
         let detailMovieViewController = DetailMovieViewController()
-        
         detailMovieViewController.titleMovieLabel.text = popularMovies[indexPath.row].title
-        
         detailMovieViewController.releaseDateMovieLabel.text = String(popularMovies[indexPath.row].releaseDate.prefix(4))
         detailMovieViewController.overviewMovieLabel.text = popularMovies[indexPath.row].overview
         
         getImageMovies(imageURLString: popularMovies[indexPath.row].poster, imageView: detailMovieViewController.movieImage)
-        
         getGenresMovies(genresMoviesID: popularMovies[indexPath.row].genre, genreMovieLabel: detailMovieViewController.genreMovieLabel)
         
         collectionView.deselectItem(at: indexPath, animated: true)
-        
         detailMovieViewController.delegate = self
-        detailMovieViewController.movie = popularMovies[indexPath.row]
+        
         selectedIndexPath = indexPath
+        
+        
         
         if popularMovies[indexPath.row].isFav {
             detailMovieViewController.favoriteButtom.isSelected = true
@@ -136,24 +185,22 @@ extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSo
         }
         
         self.navigationController?.pushViewController(detailMovieViewController, animated: true)
-        
-        
     }
     
 }
 
 //MARK: - Favorite Delegate
-extension MoviesViewController: FavoriteMovieDelegate{
+extension MoviesViewController: FavoriteMovieDelegate {
     
-    func updateFavoriteImage(movie: Movie) {
-        
+    func updateFavoriteMovie() {
         if let indexPath = selectedIndexPath {
-            
             if popularMovies[indexPath.row].isFav == true {
                 popularMovies[indexPath.row].isFav = false
-            
+                delegate?.removeMovie(popularMovies[indexPath.row])
+                
             } else {
                 popularMovies[indexPath.row].isFav = true
+                delegate?.insermovie(popularMovies[indexPath.row])
             }
             collectionView.reloadItems(at: [indexPath])
         }
@@ -163,7 +210,7 @@ extension MoviesViewController: FavoriteMovieDelegate{
 //MARK: - NETWORK
 extension MoviesViewController {
     
-    func fetchMovies () {
+    func fetchMoviesAPI () {
         
         let apiKEY = "001b2963f87a5986bb263777245cc788"
         guard let url = URL(string: "https://api.themoviedb.org/3/movie/popular?api_key=\(apiKEY)") else {
@@ -177,8 +224,8 @@ extension MoviesViewController {
                 let decoder = JSONDecoder()
                 do{
                     let filmsResponse = try decoder.decode(MovieResponse.self, from: data!)
-                    self.moviesJSON = filmsResponse.films
-                    self.fetchMovies(movieJSON: self.moviesJSON)
+                    self.popularMoviesJSON = filmsResponse.films
+                    self.fetchMovies(movieJSON: self.popularMoviesJSON)
                     self.collectionView.reloadData()
                 }
                 catch {
@@ -222,10 +269,8 @@ extension MoviesViewController {
                 do{
                     let genreResponse = try decoder.decode(GenreResponse.self, from: data!)
                     self.genresList = genreResponse.genres
-                    
                     var namesGenres: [String] = []
                     for id in self.genresList {
-                        
                         for genreID in genresMoviesID {
                             if id.id == genreID {
                                 namesGenres.append(id.name)
@@ -247,10 +292,10 @@ extension MoviesViewController {
     func fetchMovies (movieJSON: [Films]) {
         for movies in movieJSON {
             let moviesAux = Movie(id: movies.id, title: movies.title, overview: movies.overview, releaseDate: movies.date, poster: movies.poster, genre: movies.genre, isFav: false)
-            
             self.popularMovies.append(moviesAux)
-            
         }
+        
+        setupMoviesFavs()
     }
     
 }

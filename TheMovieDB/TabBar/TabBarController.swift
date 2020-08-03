@@ -10,12 +10,20 @@ import UIKit
 
 class TabBarController: UITabBarController {
     
-    let navigationControllerListMovies = UINavigationController(rootViewController: MoviesCollectionViewController())
-    let navigationControllerListFavorites = UINavigationController(rootViewController: FavoritesTableViewController())
+    let moviesViewController = MoviesViewController()
+    let favoritesMoviesViewController = FavoritesMoviesViewController()
+    
+    let navigationControllerListMovies = UINavigationController()
+    let navigationControllerListFavorites = UINavigationController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        
+        moviesViewController.delegate = favoritesMoviesViewController
+        favoritesMoviesViewController.delegate = moviesViewController
+        navigationControllerListMovies.addChild(moviesViewController)
+        navigationControllerListFavorites.addChild(favoritesMoviesViewController)
         
         self.viewControllers = [navigationControllerListMovies, navigationControllerListFavorites]
     }

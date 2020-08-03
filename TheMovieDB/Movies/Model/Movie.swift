@@ -16,6 +16,4 @@ struct Movie {
     var poster: String
     var genre: [Int]
     var isFav: Bool
-    
-    
 }

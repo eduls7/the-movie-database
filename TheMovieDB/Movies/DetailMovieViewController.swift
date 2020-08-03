@@ -8,16 +8,16 @@
 
 import UIKit
 
-protocol favoriteMovieDelegate: class {
-    func updateFavoriteImage (movieID: Int)
+protocol FavoriteMovieDelegate: class {
+    func updateFavoriteMovie ()
 }
 
 class DetailMovieViewController: UIViewController {
     
     
     //MARK: - Properties
-    weak var delegate: favoriteMovieDelegate?
-    var movieID: Int?
+    weak var delegate: FavoriteMovieDelegate?
+    
     
     lazy var scrollView: UIScrollView = {
         
@@ -118,6 +118,7 @@ class DetailMovieViewController: UIViewController {
         
     }
     
+    //MARK: - Actions
     @objc func markFavoriteButtom (buttom: UIButton){
         
         if buttom.isSelected == false {
@@ -126,9 +127,7 @@ class DetailMovieViewController: UIViewController {
         }else {
             buttom.isSelected = false
         }
-        
-        delegate?.updateFavoriteImage(movieID: movieID!)
-        
+        delegate?.updateFavoriteMovie()
     }
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
