@@ -89,16 +89,13 @@ extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSou
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FavoritesTableViewCell", for: indexPath) as! FavoritesViewCell
-        //cell.titleLabel.text = movies[indexPath.row].title
         
         let movie = moviesDB[indexPath.row]
         
-        //let test = movie.value(forKeyPath: "genresID") as? [Int]
-        
-        //print(test!)
         
         cell.titleLabel.text = movie.value(forKeyPath: "title") as? String
-        cell.releaseDate.text = movie.value(forKeyPath: "release_date") as? String
+        let date = movie.value(forKeyPath: "release_date") as? String
+        cell.releaseDate.text = String(date!.prefix(4))
         cell.overview.text = movie.value(forKeyPath: "overview") as? String
         
         return cell
@@ -125,7 +122,7 @@ extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSou
 }
 
 extension FavoritesMoviesViewController: DataSourceMovieDelegate {
-    //Insert
+    
     func insermovie(_ movie:  Movie) {
         
         let entityMovie = NSEntityDescription.entity(forEntityName: "Movies", in: managedContext)!
@@ -151,7 +148,7 @@ extension FavoritesMoviesViewController: DataSourceMovieDelegate {
         tableView.reloadData()
     }
     
-    //Remove
+    
     func removeMovie(_ movie: Movie) {
         var index = 0
         for movieDB in moviesDB {

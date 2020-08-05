@@ -20,15 +20,17 @@ class FavoritesViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-//    override func layoutSubviews() {
-//        super.layoutSubviews()
-//        
-//    }
+    //    override func layoutSubviews() {
+    //        super.layoutSubviews()
+    //
+    //    }
     
     //MARK: Properties
     lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "HelveticaNeue", size: 15)
+        
+        label.font = UIFont.boldSystemFont(ofSize: 18)
+        //label.font = UIFont(name: "HelveticaNeue", size: 15)
         label.textColor = .black
         //label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -37,6 +39,7 @@ class FavoritesViewCell: UITableViewCell {
     
     lazy var releaseDate: UILabel = {
         let label = UILabel()
+        
         label.font = UIFont(name: "HelveticaNeue", size: 15)
         label.textColor = .black
         label.numberOfLines = 1
@@ -45,13 +48,23 @@ class FavoritesViewCell: UITableViewCell {
     }()
     
     lazy var overview: UILabel = {
-           let label = UILabel()
-           label.font = UIFont(name: "HelveticaNeue", size: 15)
-           label.textColor = .black
-           label.numberOfLines = 0
-           label.translatesAutoresizingMaskIntoConstraints = false
-           return label
-       }()
+        let label = UILabel()
+        
+        label.font = UIFont(name: "HelveticaNeue", size: 13)
+        label.textColor = .black
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    lazy var movieImage: UIImageView = {
+        let image = UIImage(named: "ItunesArtwork")
+        let imageView = UIImageView()
+        imageView.image = image
+        //imageView.contentMode = UIView.ContentMode.scaleToFill
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
     
     
 }
@@ -59,20 +72,30 @@ class FavoritesViewCell: UITableViewCell {
 //MARK: - UI Setup
 extension FavoritesViewCell {
     private func setupUI() {
+        self.backgroundColor = UIColor(red: 230/255, green: 230/255, blue: 230/255, alpha: 1)
         self.contentView.addSubview(titleLabel)
         self.contentView.addSubview(releaseDate)
         self.contentView.addSubview(overview)
+        self.contentView.addSubview(movieImage)
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor),
-            titleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 10),
             
-            releaseDate.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
+            movieImage.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
+            movieImage.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 0),
+            movieImage.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: 0),
+            movieImage.heightAnchor.constraint(equalToConstant: 130),
+            movieImage.widthAnchor.constraint(equalToConstant: 100),
+            
+            titleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 15),
+            titleLabel.leadingAnchor.constraint(equalTo: movieImage.trailingAnchor, constant: 10),
+            titleLabel.bottomAnchor.constraint(equalTo: overview.topAnchor, constant: -10),
+
+            releaseDate.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 15),
             releaseDate.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10),
-            
-            
-            overview.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            overview.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 10),
+            //releaseDate.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
+
+            overview.topAnchor.constraint(equalTo: releaseDate.bottomAnchor, constant: 10),
+            overview.leadingAnchor.constraint(equalTo: movieImage.trailingAnchor, constant: 10),
             overview.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10),
             overview.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10),
             
