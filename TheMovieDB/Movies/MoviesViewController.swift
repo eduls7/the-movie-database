@@ -17,6 +17,7 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow {
     
     //MARK: - Properties
     let network = Network()
+    var page = 1
     var popularMoviesJSON: [Films] = []
     var genresList: [Genres] = []
     var popularMovies: [Movie] = []
@@ -48,14 +49,32 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow {
         
     }
     
+    var isMoreDataLoading = false
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if (!isMoreDataLoading) {
+            let scrollViewContentHeight = collectionView.contentSize.height
+            let scrollOffsetThreshold = scrollViewContentHeight - collectionView.bounds.size.height
+            
+            
+            // When the user has scrolled past the threshold, start requesting
+            if(scrollView.contentOffset.y > scrollOffsetThreshold && collectionView.isDragging) {
+                isMoreDataLoading = true
+                print("scrolling")
+                page += 1
+                loadMoreMovies()
+                
+                // ... Code to load more results ...
+            }
+            
+        }
+    }
+    
     func fetchMoviesDB(){
         do{
             moviesDB = try managedContext.fetch(fetchRequest)
         } catch let error as NSError {
             print("Could not fetch. \(error), \(error.userInfo)")
         }
-        
-        print(moviesDB.count)
     }
     
     func setupMoviesFavs () {
@@ -65,7 +84,6 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow {
             for popularMovie in popularMovies {
                 if movieID == popularMovie.id {
                     popularMovies[index].isFav = true
-                    print(popularMovies[index].title)
                 }
                 index += 1
             }
@@ -78,7 +96,7 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow {
         for movie in popularMovies {
             if movie.id == id {
                 popularMovies[index].isFav = false
-                collectionView.reloadData()
+                
             }
             index += 1
         }
@@ -193,7 +211,9 @@ extension MoviesViewController: FavoriteMovieDelegate {
     
     func updateFavoriteMovie() {
         if let indexPath = selectedIndexPath {
+            
             if popularMovies[indexPath.row].isFav == true {
+                
                 popularMovies[indexPath.row].isFav = false
                 delegate?.removeMovie(popularMovies[indexPath.row])
                 
@@ -210,9 +230,9 @@ extension MoviesViewController: FavoriteMovieDelegate {
 extension MoviesViewController {
     
     func fetchMovies () {
-        network.fetchMoviesAPI { (films) in
+        network.fetchMoviesAPI(page) { (films) in
             self.popularMoviesJSON = films
-            
+           
             for film in self.popularMoviesJSON {
                 let movie = Movie(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
                 self.popularMovies.append(movie)
@@ -222,6 +242,20 @@ extension MoviesViewController {
             self.setupUI()
         }
     
+    }
+    
+    func loadMoreMovies () {
+        network.fetchMoviesAPI(page) { (films) in
+            self.isMoreDataLoading = false
+            self.popularMoviesJSON = films
+            
+            for film in self.popularMoviesJSON {
+                let movie = Movie(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
+                self.popularMovies.append(movie)
+            }
+            self.setupMoviesFavs()
+            self.collectionView.reloadData()
+        }
     }
     
     func getGenres (genresMoviesID: [Int], genreMovieLabel: UILabel) {
@@ -245,20 +279,6 @@ extension MoviesViewController {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

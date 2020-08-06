@@ -50,7 +50,7 @@ class FavoritesViewCell: UITableViewCell {
     lazy var overview: UILabel = {
         let label = UILabel()
         
-        label.font = UIFont(name: "HelveticaNeue", size: 13)
+        label.font = UIFont(name: "Arial", size: 13)
         label.textColor = .black
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -58,10 +58,8 @@ class FavoritesViewCell: UITableViewCell {
     }()
     
     lazy var movieImage: UIImageView = {
-        let image = UIImage(named: "ItunesArtwork")
         let imageView = UIImageView()
-        imageView.image = image
-        //imageView.contentMode = UIView.ContentMode.scaleToFill
+        imageView.contentMode = UIView.ContentMode.scaleToFill
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
@@ -72,7 +70,7 @@ class FavoritesViewCell: UITableViewCell {
 //MARK: - UI Setup
 extension FavoritesViewCell {
     private func setupUI() {
-        self.backgroundColor = UIColor(red: 230/255, green: 230/255, blue: 230/255, alpha: 1)
+        self.backgroundColor = UIColor(red: 216/255, green: 216/255, blue: 216/255, alpha: 1)
         self.contentView.addSubview(titleLabel)
         self.contentView.addSubview(releaseDate)
         self.contentView.addSubview(overview)
@@ -89,11 +87,11 @@ extension FavoritesViewCell {
             titleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 15),
             titleLabel.leadingAnchor.constraint(equalTo: movieImage.trailingAnchor, constant: 10),
             titleLabel.bottomAnchor.constraint(equalTo: overview.topAnchor, constant: -10),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: releaseDate.leadingAnchor),
 
             releaseDate.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 15),
             releaseDate.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10),
-            //releaseDate.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-
+            
             overview.topAnchor.constraint(equalTo: releaseDate.bottomAnchor, constant: 10),
             overview.leadingAnchor.constraint(equalTo: movieImage.trailingAnchor, constant: 10),
             overview.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10),

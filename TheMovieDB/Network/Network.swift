@@ -10,9 +10,10 @@ import Foundation
 import UIKit
 
 class Network {
-    func fetchMoviesAPI (completionHandler: @escaping([Films]) -> Void) {
+    func fetchMoviesAPI (_ page: Int, completionHandler: @escaping([Films]) -> Void) {
+        let page = String(page)
         let apiKEY = "001b2963f87a5986bb263777245cc788"
-        guard let url = URL(string: "https://api.themoviedb.org/3/movie/popular?api_key=\(apiKEY)") else {
+        guard let url = URL(string: "https://api.themoviedb.org/3/movie/popular?api_key=\(apiKEY)&page=\(page)") else {
             print("URL com problema")
             return
         }

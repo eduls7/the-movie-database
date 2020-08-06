@@ -86,9 +86,9 @@
 				F9F019A124C73D58007805AF /* Movies */,
 				F9F019A324C73D7E007805AF /* Favorites */,
 				F9BF5D5724D9B68B0046C4D4 /* Network */,
+				F9EB22C924D46F65005071D5 /* TheMovieDB.xcdatamodeld */,
 				F9F0198F24C4B246007805AF /* Info.plist */,
 				F9F0198A24C4B246007805AF /* Assets.xcassets */,
-				F9EB22C924D46F65005071D5 /* TheMovieDB.xcdatamodeld */,
 				F9F0198C24C4B246007805AF /* LaunchScreen.storyboard */,
 			);
 			path = TheMovieDB;

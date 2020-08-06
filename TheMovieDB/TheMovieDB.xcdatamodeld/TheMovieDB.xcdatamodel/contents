@@ -5,7 +5,7 @@
         <attribute name="id" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="isFav" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="overview" optional="YES" attributeType="String"/>
-        <attribute name="poster" optional="YES" attributeType="String"/>
+        <attribute name="poster" optional="YES" attributeType="Binary"/>
         <attribute name="release_date" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
     </entity>

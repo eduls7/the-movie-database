@@ -16,7 +16,7 @@ protocol UnfavoriteMovieRow: class {
 class FavoritesMoviesViewController: UIViewController {
     
     //MARK: - Properties
-    var movies: [Movie] = []
+    let network = Network()
     weak var delegate: UnfavoriteMovieRow?
     var managedContext: NSManagedObjectContext {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -25,6 +25,15 @@ class FavoritesMoviesViewController: UIViewController {
     let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Movies")
     var moviesDB: [NSManagedObject] = []
     var result: [NSManagedObject] = []
+    
+    lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(FavoritesViewCell.self, forCellReuseIdentifier: "FavoritesTableViewCell")
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
+    }()
     
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
@@ -37,17 +46,12 @@ class FavoritesMoviesViewController: UIViewController {
         }
         setupUI()
         
+        
+        
     }
     
-    lazy var tableView: UITableView = {
-        let tableView = UITableView()
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(FavoritesViewCell.self, forCellReuseIdentifier: "FavoritesTableViewCell")
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        return tableView
-    }()
+    
+    
 }
 
 // MARK: - UI Setup
@@ -97,9 +101,17 @@ extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSou
         let date = movie.value(forKeyPath: "release_date") as? String
         cell.releaseDate.text = String(date!.prefix(4))
         cell.overview.text = movie.value(forKeyPath: "overview") as? String
+        let data = movie.value(forKeyPath: "poster") as? Data
         
+        if let data = data {
+            cell.movieImage.image = UIImage(data: data)
+        }
         return cell
         
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -123,29 +135,32 @@ extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSou
 
 extension FavoritesMoviesViewController: DataSourceMovieDelegate {
     
-    func insermovie(_ movie:  Movie) {
+    func insermovie(_ movie: Movie) {
         
         let entityMovie = NSEntityDescription.entity(forEntityName: "Movies", in: managedContext)!
         let movieNew = NSManagedObject(entity: entityMovie, insertInto: managedContext)
-        
-        movieNew.setValue(movie.id, forKey: "id")
-        movieNew.setValue(movie.title, forKey: "title")
-        movieNew.setValue(movie.isFav, forKey: "isFav")
-        movieNew.setValue(movie.poster, forKey: "poster")
-        movieNew.setValue(movie.overview, forKey: "overview")
-        movieNew.setValue(movie.releaseDate, forKey: "release_date")
-        
-        let genresID = movie.genre as [NSNumber]
-        movieNew.setValue(genresID, forKey: "genresID")
-        
-        do{
-            try managedContext.save()
-            moviesDB.append(movieNew)
+        network.fetchImagesAPI(imageURLString: movie.poster) { (image) in
+            let data = image.pngData()
+            movieNew.setValue(movie.id, forKey: "id")
+            movieNew.setValue(movie.title, forKey: "title")
+            movieNew.setValue(movie.isFav, forKey: "isFav")
+            movieNew.setValue(data, forKey: "poster")
+            movieNew.setValue(movie.overview, forKey: "overview")
+            movieNew.setValue(movie.releaseDate, forKey: "release_date")
             
-        } catch let error as NSError {
-            print("Could not save new. \(error), \(error.userInfo)")
+            let genresID = movie.genre as [NSNumber]
+            movieNew.setValue(genresID, forKey: "genresID")
+            
+            do{
+                try self.managedContext.save()
+                self.moviesDB.append(movieNew)
+                
+            } catch let error as NSError {
+                print("Could not save new. \(error), \(error.userInfo)")
+            }
+            self.tableView.reloadData()
         }
-        tableView.reloadData()
+        
     }
     
     
@@ -163,7 +178,9 @@ extension FavoritesMoviesViewController: DataSourceMovieDelegate {
         do{
             fetchRequest.predicate = NSPredicate(format: "id = %i", movie.id)
             result = try managedContext.fetch(fetchRequest)
-            managedContext.delete(result[0])
+            if result.first != nil {
+                managedContext.delete(result.first!)
+            }
             
             do{
                 try managedContext.save()
