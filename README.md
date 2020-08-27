@@ -4,18 +4,18 @@
 [![Swift Version][swift-image]][swift-url]
 [![Platform](https://img.shields.io/cocoapods/p/LFAlertController.svg?style=flat)](http://cocoapods.org/pods/LFAlertController)
 
+
+The purpose of this app is to show the popular films of the moment through a list provided by The Movie Database API that is updated daily and the possibility of you to store your films locally.
+
+The films are listed in a grid format at Home, and it is possible to click on one of their cells to go to the detail screen and view more information about the film. In the detail screen, you can bookmark the movie and the app will save your favorite movies between sessions. Upon returning home, you can see that your movie was favored by looking at a yellow heart icon. Still on the home page, you can search for a specific movie. The favorite movie on the detail screen is added to a Favorites screen, which lists all the favorite movies for you. If you want, you can remove them at any time. Still on the Favorites screen, it is possible to filter the movies from your list of favorites through the year of release of the film or by genre.
+
+
 ![Alt text](/Screenshots/Home.png)
 ![Alt text](/Screenshots/DetailMovie.png)
 ![Alt text](/Screenshots/Search.png)
 ![Alt text](/Screenshots/FavoritesList.png)
 ![Alt text](/Screenshots/Appliedfilter.png)
 ![Alt text](/Screenshots/Filter.png)
-
-
-
-The purpose of this app is to show the popular films of the moment through a list provided by The Movie Database API that is updated daily and the possibility of you to store your films locally.
-
-The films are listed in a grid format at Home, and it is possible to click on one of their cells to go to the detail screen and view more information about the film. In the detail screen, you can bookmark the movie and the app will save your favorite movies between sessions. Upon returning home, you can see that your movie was favored by looking at a yellow heart icon. Still on the home page, you can search for a specific movie. The favorite movie on the detail screen is added to a Favorites screen, which lists all the favorite movies for you. If you want, you can remove them at any time. Still on the Favorites screen, it is possible to filter the movies from your list of favorites through the year of release of the film or by genre.
 
 
 ## Features
