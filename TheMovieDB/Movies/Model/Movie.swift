@@ -13,7 +13,7 @@ struct Movie {
     var title: String
     var overview: String
     var releaseDate: String
-    var poster: String
+    var poster: String?
     var genre: [Int]
     var isFav: Bool
 }

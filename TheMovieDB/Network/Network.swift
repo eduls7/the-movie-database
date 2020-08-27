@@ -9,11 +9,17 @@
 import Foundation
 import UIKit
 
+enum NetworkError: Error {
+    case url
+}
+
 class Network {
+
     func fetchMoviesAPI (_ page: Int, completionHandler: @escaping([Films]) -> Void) {
-        let page = String(page)
+        let pageRequest = String(page)
+        
         let apiKEY = "001b2963f87a5986bb263777245cc788"
-        guard let url = URL(string: "https://api.themoviedb.org/3/movie/popular?api_key=\(apiKEY)&page=\(page)") else {
+        guard let url = URL(string: "https://api.themoviedb.org/3/movie/popular?api_key=\(apiKEY)&page=\(pageRequest)") else {
             print("URL com problema")
             return
         }
@@ -27,7 +33,7 @@ class Network {
                     completionHandler(filmsResponse.films)
                 }
                 catch {
-                    print("Error with JSON parsing")
+                    print("Error with JSON parsing: \(error)")
                 }
             }
         }
@@ -60,13 +66,13 @@ class Network {
         dataTask.resume()
     }
     
-    func fetchImagesAPI (imageURLString: String, completionHandler: @escaping(UIImage) -> Void)  {
+    func fetchImagesAPI (imageURLString: String ,completionHandler: @escaping(UIImage) -> Void)  {
         
-        guard let imageURL = URL(string: "https://image.tmdb.org/t/p/original/\(imageURLString)") else {
+        guard let imageURL = URL(string: "https://image.tmdb.org/t/p/w342/\(imageURLString)") else {
             print("Error in convert imageURLString to URL")
             return
         }
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .default).async {
             guard let imageData = try? Data(contentsOf: imageURL) else {
                 print("Error in convert imageURL to DATA")
                 return

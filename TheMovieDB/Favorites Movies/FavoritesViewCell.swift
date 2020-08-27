@@ -20,10 +20,6 @@ class FavoritesViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //    override func layoutSubviews() {
-    //        super.layoutSubviews()
-    //
-    //    }
     
     //MARK: Properties
     lazy var titleLabel: UILabel = {
@@ -78,10 +74,9 @@ extension FavoritesViewCell {
         
         NSLayoutConstraint.activate([
             
-            movieImage.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
-            movieImage.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 0),
-            movieImage.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: 0),
-            movieImage.heightAnchor.constraint(equalToConstant: 130),
+            movieImage.leftAnchor.constraint(equalTo: self.contentView.leftAnchor),
+            movieImage.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+            movieImage.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor),
             movieImage.widthAnchor.constraint(equalToConstant: 100),
             
             titleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 15),
@@ -91,7 +86,7 @@ extension FavoritesViewCell {
 
             releaseDate.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 15),
             releaseDate.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10),
-            
+
             overview.topAnchor.constraint(equalTo: releaseDate.bottomAnchor, constant: 10),
             overview.leadingAnchor.constraint(equalTo: movieImage.trailingAnchor, constant: 10),
             overview.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10),

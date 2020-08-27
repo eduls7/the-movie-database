@@ -118,6 +118,16 @@ class DetailMovieViewController: UIViewController {
         
     }
     
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        
+        hidesBottomBarWhenPushed = true
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     //MARK: - Actions
     @objc func markFavoriteButtom (buttom: UIButton){
         
@@ -130,21 +140,11 @@ class DetailMovieViewController: UIViewController {
         delegate?.updateFavoriteMovie()
     }
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-        
-        hidesBottomBarWhenPushed = true
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    
-    
+
     //MARK: - SetupUI
     func setupUI () {
-        
+        self.navigationItem.largeTitleDisplayMode = .never
+        self.navigationItem.title = "Movie"
         self.view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(movieImage)
@@ -184,6 +184,7 @@ class DetailMovieViewController: UIViewController {
             
             favoriteButtom.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
             favoriteButtom.bottomAnchor.constraint(equalTo: lineSeparatorView1.bottomAnchor, constant: -10),
+
             
             lineSeparatorView2.heightAnchor.constraint(equalToConstant: 0.5),
             lineSeparatorView2.topAnchor.constraint(equalTo: lineSeparatorView1.bottomAnchor, constant: 60),

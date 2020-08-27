@@ -16,6 +16,9 @@ class TabBarController: UITabBarController {
     let navigationControllerListMovies = UINavigationController()
     let navigationControllerListFavorites = UINavigationController()
     
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -32,8 +35,10 @@ class TabBarController: UITabBarController {
     
     //MARK: - SetupUI
     func setupUI () {
-        
+       
         self.tabBar.barTintColor = UIColor(red: 247/255, green: 206/255, blue: 91/255, alpha: 1)
+        
+        
         navigationControllerListMovies.tabBarItem = UITabBarItem(title: "Movies", image: UIImage(named: "list_icon"), selectedImage: nil)
         
         navigationControllerListFavorites.tabBarItem = UITabBarItem(title: "Favorites", image: UIImage(named: "favorite_empty_icon"), selectedImage: nil)

@@ -10,25 +10,27 @@ import UIKit
 import CoreData
 
 protocol DataSourceMovieDelegate: class {
-    func insermovie (_ movie: Movie)
+    func insertMovie (_ movie: Movie)
     func removeMovie (_ movie: Movie)
 }
-class MoviesViewController: UIViewController, UnfavoriteMovieRow {
+class MoviesViewController: UIViewController, UnfavoriteMovieRow, UISearchResultsUpdating {
+    
+    
     
     //MARK: - Properties
     let network = Network()
     var page = 1
-    var popularMoviesJSON: [Films] = []
-    var genresList: [Genres] = []
-    var popularMovies: [Movie] = []
     var selectedIndexPath: IndexPath?
+    var popularMoviesTotal: [Movie] = []
+    var popularMovies: [Movie] = []
     weak var delegate: DataSourceMovieDelegate?
+    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Movies")
+    var moviesDataBase: [NSManagedObject] = []
+    
     var managedContext: NSManagedObjectContext {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         return appDelegate.persistentContainer.viewContext
     }
-    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Movies")
-    var moviesDB: [NSManagedObject] = []
     
     lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewLayout())
@@ -40,67 +42,35 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow {
         return collectionView
     }()
     
+    lazy var searchController: UISearchController = {
+        let search = UISearchController()
+        search.searchResultsUpdater = self
+        return search
+    }()
+    
     //MARK: - Initializers
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        fetchMoviesDB()
+        fetchMoviesDataBase()
         fetchMovies()
+        //setupUI()
+                
+    }
+    
+    func updateSearchResults(for searchController: UISearchController) {
         
+        popularMovies = popularMoviesTotal
+        if let searchText = searchController.searchBar.text, searchText != "" {
+            
+            popularMovies = searchText.isEmpty ? popularMoviesTotal: popularMoviesTotal.filter { return $0.title.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil }
+            
+        }
+        collectionView.reloadData()
     }
-    
+
     var isMoreDataLoading = false
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if (!isMoreDataLoading) {
-            let scrollViewContentHeight = collectionView.contentSize.height
-            let scrollOffsetThreshold = scrollViewContentHeight - collectionView.bounds.size.height
-            
-            
-            // When the user has scrolled past the threshold, start requesting
-            if(scrollView.contentOffset.y > scrollOffsetThreshold && collectionView.isDragging) {
-                isMoreDataLoading = true
-                print("scrolling")
-                page += 1
-                loadMoreMovies()
-                
-                // ... Code to load more results ...
-            }
-            
-        }
-    }
     
-    func fetchMoviesDB(){
-        do{
-            moviesDB = try managedContext.fetch(fetchRequest)
-        } catch let error as NSError {
-            print("Could not fetch. \(error), \(error.userInfo)")
-        }
-    }
-    
-    func setupMoviesFavs () {
-        for movieDB in moviesDB {
-            let movieID = movieDB.value(forKeyPath: "id") as? Int
-            var index = 0
-            for popularMovie in popularMovies {
-                if movieID == popularMovie.id {
-                    popularMovies[index].isFav = true
-                }
-                index += 1
-            }
-            
-        }
-    }
-    
-    func unfavoriteMovie(_ id: Int) {
-        var index = 0
-        for movie in popularMovies {
-            if movie.id == id {
-                popularMovies[index].isFav = false
-                
-            }
-            index += 1
-        }
-    }
 }
 
 // MARK: - UI Setup
@@ -110,15 +80,11 @@ extension MoviesViewController {
         if #available(iOS 13.6, *) {
             overrideUserInterfaceStyle = .light
         }
-        
         setupUINavigationBarController()
-        
-        self.view.backgroundColor = .white
-        
         self.view.addSubview(collectionView)
-        
+
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: self.view.topAnchor),
             collectionView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             collectionView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
             collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
@@ -145,10 +111,20 @@ extension MoviesViewController {
     }
     
     func setupUINavigationBarController () {
-        self.navigationItem.title = "Movies"
-        self.navigationController?.navigationBar.barTintColor = UIColor(red: 247/255, green: 206/255, blue: 91/255, alpha: 1)
+        
+        if let navigationController = self.navigationController {
+            
+            let navigationBarAppearence = UINavigationBarAppearance()
+            navigationBarAppearence.backgroundColor = UIColor(red: 247/255, green: 206/255, blue: 91/255, alpha: 1)
+            
+            self.navigationItem.title = "Movies"
+            navigationController.navigationBar.prefersLargeTitles = true
+            navigationItem.searchController = searchController
+            navigationController.navigationBar.scrollEdgeAppearance = navigationBarAppearence
+            navigationController.navigationBar.standardAppearance = navigationBarAppearence
+            searchController.obscuresBackgroundDuringPresentation = false
+        }
     }
-    
 }
 
 
@@ -172,7 +148,11 @@ extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSo
             cell.favoriteIconImage.image = UIImage(named: "favorite_gray_icon")
         }
         
-        getImages(imageView: cell.movieImage, imageURL: popularMovies[indexPath.row].poster)
+        if let poster = popularMovies[indexPath.row].poster  {
+            getImages(imageView: cell.movieImage, imageURL: poster)
+        }
+        
+        
         return cell
     }
     
@@ -184,7 +164,10 @@ extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSo
         detailMovieViewController.releaseDateMovieLabel.text = String(popularMovies[indexPath.row].releaseDate.prefix(4))
         detailMovieViewController.overviewMovieLabel.text = popularMovies[indexPath.row].overview
         
-        getImages(imageView: detailMovieViewController.movieImage, imageURL: popularMovies[indexPath.row].poster)
+        if let poster = popularMovies[indexPath.row].poster  {
+            getImages(imageView: detailMovieViewController.movieImage, imageURL: poster)
+        }
+        
         getGenres(genresMoviesID: popularMovies[indexPath.row].genre, genreMovieLabel: detailMovieViewController.genreMovieLabel)
         
         
@@ -215,59 +198,105 @@ extension MoviesViewController: FavoriteMovieDelegate {
             if popularMovies[indexPath.row].isFav == true {
                 
                 popularMovies[indexPath.row].isFav = false
+                popularMoviesTotal[indexPath.row].isFav = false
                 delegate?.removeMovie(popularMovies[indexPath.row])
                 
             } else {
                 popularMovies[indexPath.row].isFav = true
-                delegate?.insermovie(popularMovies[indexPath.row])
+                popularMoviesTotal[indexPath.row].isFav = true
+                delegate?.insertMovie(popularMovies[indexPath.row])
             }
-            collectionView.reloadItems(at: [indexPath])
+            DispatchQueue.main.async {
+                self.collectionView.reloadItems(at: [indexPath])
+            }
+            
         }
     }
 }
 
+//MARK: - DATABASE Functions
+extension MoviesViewController {
+    
+    func fetchMoviesDataBase(){
+        do{
+            moviesDataBase = try managedContext.fetch(fetchRequest)
+        } catch let error as NSError {
+            print("Could not fetch. \(error), \(error.userInfo)")
+        }
+    }
+    
+    func setupMoviesFavs () {
+        
+        for movieDB in moviesDataBase {
+            let movieID = movieDB.value(forKeyPath: "id") as? Int
+            var index = 0
+            for movie in popularMoviesTotal {
+                if movieID == movie.id {
+                    popularMoviesTotal[index].isFav = true
+                }
+                index += 1
+            }
+            
+        }
+    }
+    
+    func unfavoriteMovie(_ id: Int) {
+        var index = 0
+        for movie in popularMoviesTotal {
+            if movie.id == id {
+                popularMoviesTotal[index].isFav = false
+                popularMovies[index].isFav = false
+                collectionView.reloadData()
+            }
+            index += 1
+        }
+    }
+}
 //MARK: - NETWORK
 extension MoviesViewController {
     
     func fetchMovies () {
         network.fetchMoviesAPI(page) { (films) in
-            self.popularMoviesJSON = films
-           
-            for film in self.popularMoviesJSON {
-                let movie = Movie(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
-                self.popularMovies.append(movie)
-            }
             
+            for film in films {
+                
+                let movie = Movie(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
+                self.popularMoviesTotal.append(movie)
+            }
             self.setupMoviesFavs()
+            self.popularMovies = self.popularMoviesTotal
             self.setupUI()
         }
-    
+        
     }
     
-    func loadMoreMovies () {
-        network.fetchMoviesAPI(page) { (films) in
-            self.isMoreDataLoading = false
-            self.popularMoviesJSON = films
-            
-            for film in self.popularMoviesJSON {
-                let movie = Movie(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
-                self.popularMovies.append(movie)
-            }
+     func loadMoreMovies () {
+         network.fetchMoviesAPI(page) { (films) in
+             self.isMoreDataLoading = false
+             
+             for film in films {
+                 let movie = Movie(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
+                 self.popularMovies.append(movie)
+             }
             self.setupMoviesFavs()
+            self.popularMovies = self.popularMoviesTotal
             self.collectionView.reloadData()
-        }
-    }
+         }
+     }
     
-    func getGenres (genresMoviesID: [Int], genreMovieLabel: UILabel) {
-        network.fetchGenresAPI { (genres) in
-            self.genresList = genres
-            var namesGenres: [String] = []
-            for id in self.genresList {
-                for genreID in genresMoviesID {
-                    if id.id == genreID {
-                        namesGenres.append(id.name)
-                        genreMovieLabel.text = namesGenres.joined(separator: ", ")
-                    }
+    //isMoreDataLoading start with false
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        if (!isMoreDataLoading) {
+            let scrollViewContentHeight = collectionView.contentSize.height
+            let scrollOffsetThreshold = scrollViewContentHeight - collectionView.bounds.size.height
+            
+            // When the user has scrolled past the threshold, start requesting
+            if(scrollView.contentOffset.y > scrollOffsetThreshold && collectionView.isDragging) {
+                isMoreDataLoading = true
+                if page <= 499 {
+                    page += 1
+                    loadMoreMovies()
                 }
             }
         }
@@ -276,6 +305,20 @@ extension MoviesViewController {
     func getImages (imageView: UIImageView, imageURL: String) {
         network.fetchImagesAPI(imageURLString: imageURL) { (image) in
             imageView.image = image
+        }
+    }
+    
+    func getGenres (genresMoviesID: [Int], genreMovieLabel: UILabel) {
+        network.fetchGenresAPI { (genres) in
+            var namesGenres: [String] = []
+            for id in genres {
+                for genreID in genresMoviesID {
+                    if id.id == genreID {
+                        namesGenres.append(id.name)
+                        genreMovieLabel.text = namesGenres.joined(separator: ", ")
+                    }
+                }
+            }
         }
     }
 }
