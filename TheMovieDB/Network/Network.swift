@@ -68,7 +68,7 @@ class Network {
     
     func fetchImagesAPI (imageURLString: String ,completionHandler: @escaping(UIImage) -> Void)  {
         
-        guard let imageURL = URL(string: "https://image.tmdb.org/t/p/w342/\(imageURLString)") else {
+        guard let imageURL = URL(string: "https://image.tmdb.org/t/p/w300/\(imageURLString)") else {
             print("Error in convert imageURLString to URL")
             return
         }

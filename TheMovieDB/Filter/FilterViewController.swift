@@ -80,6 +80,8 @@ class FilterViewController: UIViewController, SelectFilterYear, SelectFilterGenr
         setupUI()
         getDateMovies()
         getGenres()
+        
+        
     }
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {

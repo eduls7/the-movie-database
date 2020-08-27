@@ -171,7 +171,7 @@ class DetailMovieViewController: UIViewController {
             movieImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             movieImage.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -10),
             movieImage.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 10),
-            movieImage.heightAnchor.constraint(equalToConstant: 320),
+            //movieImage.heightAnchor.constraint(equalToConstant: 320),
             
             lineSeparatorView1.heightAnchor.constraint(equalToConstant: 0.5),
             lineSeparatorView1.topAnchor.constraint(equalTo: movieImage.bottomAnchor, constant: 70),

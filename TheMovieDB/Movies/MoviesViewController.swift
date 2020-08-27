@@ -26,7 +26,7 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow, UISearchResult
     weak var delegate: DataSourceMovieDelegate?
     let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Movies")
     var moviesDataBase: [NSManagedObject] = []
-    
+    var isMoreDataLoading = false
     var managedContext: NSManagedObjectContext {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         return appDelegate.persistentContainer.viewContext
@@ -54,6 +54,7 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow, UISearchResult
         
         fetchMoviesDataBase()
         fetchMovies()
+        DispatchQueue.visib
         //setupUI()
                 
     }
@@ -69,7 +70,7 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow, UISearchResult
         collectionView.reloadData()
     }
 
-    var isMoreDataLoading = false
+    
     
 }
 
