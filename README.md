@@ -4,6 +4,8 @@
 [![Swift Version][swift-image]][swift-url]
 [![Platform](https://img.shields.io/cocoapods/p/LFAlertController.svg?style=flat)](http://cocoapods.org/pods/LFAlertController)
 
+![Alt text](/relative/path/to/img.jpg?raw=true "Optional Title")
+
 
 The purpose of this app is to show the popular films of the moment through a list provided by The Movie Database API that is updated daily and the possibility of you to store your films locally.
 
