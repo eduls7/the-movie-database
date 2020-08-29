@@ -10,11 +10,10 @@ import UIKit
 import CoreData
 
 protocol DataSourceMovieDelegate: class {
-    func insertMovie (_ movie: Movie)
-    func removeMovie (_ movie: Movie)
+    func insertMovie (_ movie: Movie, _ button: UIButton)
+    func removeMovie (_ movie: Movie, _ button: UIButton)
 }
 class MoviesViewController: UIViewController, UnfavoriteMovieRow, UISearchResultsUpdating {
-    
     
     
     //MARK: - Properties
@@ -54,20 +53,24 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow, UISearchResult
         
         fetchMoviesDataBase()
         fetchMovies()
-        DispatchQueue.visib
         //setupUI()
                 
     }
     
     func updateSearchResults(for searchController: UISearchController) {
-        
+        let totalMoviesObject = popularMovies.count
         popularMovies = popularMoviesTotal
+        
         if let searchText = searchController.searchBar.text, searchText != "" {
             
             popularMovies = searchText.isEmpty ? popularMoviesTotal: popularMoviesTotal.filter { return $0.title.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil }
-            
+        
         }
-        collectionView.reloadData()
+        
+        if totalMoviesObject != popularMovies.count  {
+            collectionView.reloadData()
+        }
+        
     }
 
     
@@ -96,8 +99,6 @@ extension MoviesViewController {
         let layout = UICollectionViewFlowLayout()
         let cellWidthConstant: CGFloat = UIScreen.main.bounds.width * 0.461
         let cellHeightConstant: CGFloat = UIScreen.main.bounds.height * 0.38
-        //        print(cellWidthConstant)
-        //        print(cellHeightConstant)
         
         layout.sectionInset = UIEdgeInsets(top: 0,
                                            left: 10,
@@ -193,23 +194,25 @@ extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSo
 //MARK: - Favorite Delegate
 extension MoviesViewController: FavoriteMovieDelegate {
     
-    func updateFavoriteMovie() {
+    func updateFavoriteMovie(_ button: UIButton) {
+    
         if let indexPath = selectedIndexPath {
+            
             
             if popularMovies[indexPath.row].isFav == true {
                 
                 popularMovies[indexPath.row].isFav = false
                 popularMoviesTotal[indexPath.row].isFav = false
-                delegate?.removeMovie(popularMovies[indexPath.row])
+                delegate?.removeMovie(popularMovies[indexPath.row], button)
                 
             } else {
                 popularMovies[indexPath.row].isFav = true
                 popularMoviesTotal[indexPath.row].isFav = true
-                delegate?.insertMovie(popularMovies[indexPath.row])
+                delegate?.insertMovie(popularMovies[indexPath.row], button)
             }
-            DispatchQueue.main.async {
-                self.collectionView.reloadItems(at: [indexPath])
-            }
+            
+            self.collectionView.reloadItems(at: [indexPath])
+            
             
         }
     }
@@ -277,7 +280,7 @@ extension MoviesViewController {
              
              for film in films {
                  let movie = Movie(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
-                 self.popularMovies.append(movie)
+                 self.popularMoviesTotal.append(movie)
              }
             self.setupMoviesFavs()
             self.popularMovies = self.popularMoviesTotal

@@ -14,18 +14,22 @@ protocol FilterMovies {
     func updateListMoviesWithFilterGenre(genreFilter: String)
 }
 
+enum FilterType {
+    case genre
+    case year
+}
+
 class FilterViewController: UIViewController, SelectFilterYear, SelectFilterGenre {
-    
-    
     
     //MARK: - PROPERTIES
     var filters: [String] = ["Date", "Genres"]
     var yearFilter: String?
     var genreFilter: String?
-    var genresID: [Int] = []
+    var genresNames: [String] = []
     var delegate: FilterMovies?
     var moviesDataBase: [NSManagedObject] = []
     var datesMovies: [String] = []
+    var filterType: FilterType?
     
     lazy var emptyFooterview: UIView = {
         let view = UIView()
@@ -39,7 +43,7 @@ class FilterViewController: UIViewController, SelectFilterYear, SelectFilterGenr
         let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
-        //tableView.tableFooterView = emptyFooterview
+        tableView.tableFooterView = UIView()
         tableView.rowHeight = 45
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(FilterViewCell.self, forCellReuseIdentifier: "FilterTableViewCell")
@@ -58,20 +62,28 @@ class FilterViewController: UIViewController, SelectFilterYear, SelectFilterGenr
     }()
     
     @objc func applyFilter (button: UIButton) {
-        
-        if let year = yearFilter {
-            print(year)
-            delegate?.updateListMoviesWithFilterYear(yearFilter: year)
+        guard let filterType = filterType else { return }
+        switch filterType {
+        case .year:
+            delegate?.updateListMoviesWithFilterYear(yearFilter: yearFilter!)
             navigationController?.popViewController(animated: true)
+            break
+        case .genre:
+            delegate?.updateListMoviesWithFilterGenre(genreFilter: genreFilter!)
+            navigationController?.popViewController(animated: true)
+            break
         }
+        
     }
     
-    func dateFilter(year: String)  {
+    func dateFilter(_ year: String, _ type: FilterType) {
         self.yearFilter = year
+        self.filterType = type
     }
     
-    func genreFilter(genre: String) {
+    func genreFilter(_ genre: String, _ type: FilterType) {
         self.genreFilter = genre
+        self.filterType = type
     }
     
     //MARK: - INITIALIZERS
@@ -107,13 +119,14 @@ class FilterViewController: UIViewController, SelectFilterYear, SelectFilterGenr
     
     func getGenres () {
         for movie in moviesDataBase {
-            let genresArray = movie.value(forKey: "genresID") as? [Int]
-            if let genres = genresArray {
-                for g in genres {
-                    if !genresID.contains(g) {
-                        genresID.append(g)
+            let genresMoviesDB = movie.value(forKey: "genresID") as? [String]
+            if let genresMovies = genresMoviesDB {
+                for genres in genresMovies {
+                    if !genresNames.contains(genres) {
+                        genresNames.append(genres)
                     }
                 }
+                //print(genresNames.count)
             }
         }
     }
@@ -145,7 +158,7 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
         }else{
             let genresFilterViewController = GenresFilterViewController()
             genresFilterViewController.delegate = self
-            genresFilterViewController.genresID = genresID
+            genresFilterViewController.genresNames = genresNames
             navigationController?.pushViewController(genresFilterViewController, animated: true)
         }
         

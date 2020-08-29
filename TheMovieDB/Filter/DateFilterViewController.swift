@@ -10,7 +10,7 @@ import UIKit
 import CoreData
 
 protocol SelectFilterYear {
-    func dateFilter(year: String)
+    func dateFilter(_ year: String, _ type: FilterType)
     
 }
 
@@ -31,12 +31,18 @@ class DateFilterViewController: UIViewController {
         let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
-        //tableView.tableFooterView = emptyFooterview
+        tableView.tableFooterView = footerView
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(DateFilterTableViewCell.self, forCellReuseIdentifier: "DateFilter")
-        //tableView.allowsMultipleSelection = false
    
         return tableView
+    }()
+    
+    
+    lazy var footerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     //MARK: - INITIALIZERS
@@ -75,7 +81,7 @@ extension DateFilterViewController: UITableViewDelegate, UITableViewDataSource {
         if let cell = tableView.cellForRow(at: indexPath) {
             if cell.accessoryType == .none {
                 cell.accessoryType = .checkmark
-                delegate?.dateFilter(year: years[indexPath.row])
+                delegate?.dateFilter(years[indexPath.row], .year)
             }else{
                 cell.accessoryType = .none
             }
@@ -91,9 +97,10 @@ extension DateFilterViewController {
     func setupUI () {
         self.view.addSubview(tableView)
         
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 0),
-            tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 0),
+            tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             tableView.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: 0),
             tableView.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: 0),
             

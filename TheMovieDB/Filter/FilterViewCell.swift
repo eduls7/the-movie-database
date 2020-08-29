@@ -45,9 +45,9 @@ extension FilterViewCell {
         //self.addSubview(optionFilterLabel)
         
         NSLayoutConstraint.activate([
-            filterTypeLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 8),
-            filterTypeLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 5),
-            filterTypeLabel.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -5),
+            filterTypeLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 15),
+            filterTypeLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
+            filterTypeLabel.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10),
             //filterTypeLabel.rightAnchor.constraint(equalTo: optionFilterLabel.leadingAnchor, constant: -80),
             
 //            optionFilterLabel.rightAnchor.constraint(equalTo: self.contentView.rightAnchor, constant: -30),

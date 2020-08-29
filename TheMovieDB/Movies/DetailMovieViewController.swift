@@ -9,7 +9,7 @@
 import UIKit
 
 protocol FavoriteMovieDelegate: class {
-    func updateFavoriteMovie ()
+    func updateFavoriteMovie (_ button: UIButton)
 }
 
 class DetailMovieViewController: UIViewController {
@@ -130,14 +130,7 @@ class DetailMovieViewController: UIViewController {
     
     //MARK: - Actions
     @objc func markFavoriteButtom (buttom: UIButton){
-        
-        if buttom.isSelected == false {
-            buttom.isSelected = true
-            
-        }else {
-            buttom.isSelected = false
-        }
-        delegate?.updateFavoriteMovie()
+        delegate?.updateFavoriteMovie(buttom)
     }
     
 

@@ -32,11 +32,13 @@ class DateFilterTableViewCell: UITableViewCell {
 extension DateFilterTableViewCell {
     
     func setupUI () {
-        self.addSubview(year)
+        self.contentView.addSubview(year)
         
         NSLayoutConstraint.activate([
-            //dateFilterLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 0),
-            //dateFilterLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 0)
+            year.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 15),
+            year.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
+            year.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10),
+           
         ])
     }
 }

@@ -9,13 +9,12 @@
 import UIKit
 
 protocol SelectFilterGenre {
-    func genreFilter (genre: String)
+    func genreFilter (_ genre: String, _ type: FilterType)
 }
 
 class GenresFilterViewController: UIViewController {
     
     //MARK: - Properties
-    var genresID: [Int] = []
     var genresNames: [String] = []
     let network = Network()
     var delegate: SelectFilterGenre?
@@ -24,7 +23,7 @@ class GenresFilterViewController: UIViewController {
         let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
-        //tableView.tableFooterView = emptyFooterview
+        tableView.tableFooterView = UIView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(GenresTableViewCell.self, forCellReuseIdentifier: "GenresFilter")
         
@@ -35,25 +34,24 @@ class GenresFilterViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        getGenres(genresMoviesID: genresID)
         setupUI()
     }
     
-    func getGenres (genresMoviesID: [Int]) {
-        print(genresID)
-        network.fetchGenresAPI { (genres) in
-            for genre in genres {
-                for genreID in self.genresID {
-                    if genre.id == genreID {
-                        self.genresNames.append(genre.name)
-                    }
-                }
-            }
-            self.tableView.reloadData()
-            print(self.genresNames.count)
-            print(self.genresNames)
-        }
-    }
+//    func getGenres (genresMoviesID: [String]) {
+//        print(genresID)
+//        network.fetchGenresAPI { (genres) in
+//            for genre in genres {
+//                for genreID in self.genresID {
+//                    if genre.id == genreID {
+//                        self.genresNames.append(genre.name)
+//                    }
+//                }
+//            }
+//            self.tableView.reloadData()
+//            print(self.genresNames.count)
+//            print(self.genresNames)
+//        }
+//    }
 
     
 }
@@ -77,8 +75,8 @@ extension GenresFilterViewController: UITableViewDelegate, UITableViewDataSource
         if let cell = tableView.cellForRow(at: indexPath) {
             if cell.accessoryType == .none {
                 cell.accessoryType = .checkmark
-                print(genresNames[indexPath.row])
-                delegate?.genreFilter(genre: genresNames[indexPath.row])
+                
+                delegate?.genreFilter(genresNames[indexPath.row], .genre)
             }else{
                 cell.accessoryType = .none
             }

@@ -32,11 +32,12 @@ class GenresTableViewCell: UITableViewCell {
 extension GenresTableViewCell {
     
     func setupUI () {
-        self.addSubview(genres)
+        self.contentView.addSubview(genres)
         
         NSLayoutConstraint.activate([
-            //dateFilterLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 0),
-            //dateFilterLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 0)
+            genres.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 15),
+            genres.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
+            genres.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10),
         ])
     }
 }

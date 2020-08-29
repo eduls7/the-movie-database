@@ -16,9 +16,6 @@ class TabBarController: UITabBarController {
     let navigationControllerListMovies = UINavigationController()
     let navigationControllerListFavorites = UINavigationController()
     
-    
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -30,8 +27,6 @@ class TabBarController: UITabBarController {
         
         self.viewControllers = [navigationControllerListMovies, navigationControllerListFavorites]
     }
-    
-    
     
     //MARK: - SetupUI
     func setupUI () {

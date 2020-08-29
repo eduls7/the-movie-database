@@ -13,7 +13,7 @@ protocol UnfavoriteMovieRow: class {
     func unfavoriteMovie (_ id: Int)
 }
 
-class FavoritesMoviesViewController: UIViewController, FilterMovies {
+class FavoritesMoviesViewController: UIViewController {
     
     
     
@@ -29,6 +29,7 @@ class FavoritesMoviesViewController: UIViewController, FilterMovies {
     var moviesTotalDataBase: [NSManagedObject] = []
     var fetchResult: [NSManagedObject] = []
     var genresNames: [String] = []
+    var genresNamesTotal: [String] = []
     lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.delegate = self
@@ -50,6 +51,17 @@ class FavoritesMoviesViewController: UIViewController, FilterMovies {
         return button
     }()
     
+    lazy var filterBarButton: UIBarButtonItem = {
+        let button = UIButton()
+        let image = UIImage(named: "FilterIcon")
+        
+        button.setImage(image, for: .normal)
+        button.addTarget(self, action: #selector(filterMovies(button:)), for: .touchUpInside)
+        let buttonBar = UIBarButtonItem(customView: button)
+        
+        return buttonBar
+    }()
+    
     //MARK: - NSLAYOUT Constraints
     var leftConstraintTableView: NSLayoutConstraint?
     var rightConstraintTableView: NSLayoutConstraint?
@@ -62,58 +74,12 @@ class FavoritesMoviesViewController: UIViewController, FilterMovies {
     var heightConstraintButton: NSLayoutConstraint?
     var removeFilterButtonIsActive = false
     
-    //MARK: - Filter Delegate
-    lazy var filterBarButton: UIBarButtonItem = {
-        let button = UIButton()
-        let image = UIImage(named: "FilterIcon")
-        
-        button.setImage(image, for: .normal)
-        button.addTarget(self, action: #selector(filterMovies(button:)), for: .touchUpInside)
-        let buttonBar = UIBarButtonItem(customView: button)
-        
-        return buttonBar
-    }()
     
-    
-    @objc func filterMovies (button: UIButton) {
-        let filterViewController = FilterViewController()
-        filterViewController.delegate = self
-        filterViewController.moviesDataBase = moviesDataBase
-        self.navigationController?.pushViewController(filterViewController, animated: true)
-    }
-    
-    @objc func removeFilterMovies (button: UIButton) {
-        moviesDataBase = moviesTotalDataBase
-        removeFilterButtonIsActive = false
-        updateUI()
-        tableView.reloadData()
-    }
-    
-    
-    func updateListMoviesWithFilterYear(yearFilter: String) {
-        do {
-            fetchRequest.predicate = NSPredicate(format: "release_date = \(yearFilter)")
-            moviesDataBase = try managedContext.fetch(fetchRequest)
-            
-            if !moviesDataBase.isEmpty {
-                removeFilterButtonIsActive = true
-                updateUI()
-                tableView.reloadData()
-            }
-            
-        } catch let error as NSError {
-            print("Could not fetch filter. \(error), \(error.userInfo)")
-            
-        }
-    }
-    
-    func updateListMoviesWithFilterGenre(genreFilter: String) {
-        
-    }
     
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
+    
         
         do {
             moviesTotalDataBase = try managedContext.fetch(fetchRequest)
@@ -122,10 +88,13 @@ class FavoritesMoviesViewController: UIViewController, FilterMovies {
             print("Could not fetch. \(error), \(error.userInfo)")
         }
         setupUI()
+        //getGenres()
     }
     
     
 }
+
+
 
 // MARK: - UI Setup
 extension FavoritesMoviesViewController {
@@ -258,28 +227,12 @@ extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSou
 
 extension FavoritesMoviesViewController: DataSourceMovieDelegate {
     
-    func getGenres (genresID: [Int]) {
-        network.fetchGenresAPI { (genresReponse) in
-            
-            for genre in genresReponse {
-                for id in genresID {
-                    if id == genre.id {
-                        self.genresNames.append(genre.name)
-                    }
-                }
-            }
-        }
-    }
-    
-    func saveMovieInDataBase (_ movie: Movie) {
+    func insertMovie(_ movie: Movie, _ button: UIButton) {
         
-    }
-    
-    
-    func insertMovie(_ movie: Movie) {
         let entityMovie = NSEntityDescription.entity(forEntityName: "Movies", in: managedContext)!
         let movieNew = NSManagedObject(entity: entityMovie, insertInto: managedContext)
         var data: Data?
+        
         
         guard let poster = movie.poster else { return print("Poster movie with nil value") }
         
@@ -293,30 +246,38 @@ extension FavoritesMoviesViewController: DataSourceMovieDelegate {
             movieNew.setValue(movie.title, forKey: "title")
             movieNew.setValue(movie.isFav, forKey: "isFav")
             movieNew.setValue(movie.overview, forKey: "overview")
-        
-            self.getGenres(genresID: movie.genre)
-            print(self.genresNames)
-            self.genresNames = []
-            let genresNames = self.genresNames as [NSString]
-            movieNew.setValue(genresNames, forKey: "genresID")
             
-            do{
-                try self.managedContext.save()
-                self.moviesTotalDataBase.append(movieNew)
-                self.moviesDataBase.append(movieNew)
-                print(self.moviesDataBase.count)
-                self.tableView.reloadData()
+            self.network.fetchGenresAPI { (genresReponse) in
                 
-            } catch let error as NSError {
-                print("Could not save new. \(error), \(error.userInfo)")
+                for genre in genresReponse {
+                    for id in movie.genre {
+                        if id == genre.id {
+                            self.genresNames.append(genre.name)
+                        }
+                    }
+                }
+                
+                let genresNames = self.genresNames as [NSString]
+                movieNew.setValue(genresNames, forKey: "genresID")
+                
+                do{
+                    try self.managedContext.save()
+                    self.genresNames = []
+                    self.moviesTotalDataBase.append(movieNew)
+                    self.moviesDataBase.append(movieNew)
+                    self.tableView.reloadData()
+                    button.isSelected = true
+                    
+                } catch let error as NSError {
+                    print("Could not save new. \(error), \(error.userInfo)")
+                }
             }
         }
-        
-        
     }
     
     
-    func removeMovie(_ movie: Movie) {
+    func removeMovie(_ movie: Movie, _ button: UIButton) {
+        
         
         do {
             fetchRequest.predicate = NSPredicate(format: "id != %i", movie.id)
@@ -338,6 +299,7 @@ extension FavoritesMoviesViewController: DataSourceMovieDelegate {
             
             do{
                 try managedContext.save()
+                button.isSelected = false
                 
             } catch let error as NSError {
                 print("Could not save movie deleted. \(error), \(error.userInfo)")
@@ -346,5 +308,65 @@ extension FavoritesMoviesViewController: DataSourceMovieDelegate {
             print("Could not fetch. \(error), \(error.userInfo)")
             
         }
+    }
+}
+
+extension FavoritesMoviesViewController: FilterMovies {
+    //MARK: - Filter Movie Protocol
+    @objc func filterMovies (button: UIButton) {
+        let filterViewController = FilterViewController()
+        filterViewController.delegate = self
+        filterViewController.moviesDataBase = moviesDataBase
+        self.navigationController?.pushViewController(filterViewController, animated: true)
+    }
+    
+    @objc func removeFilterMovies (button: UIButton) {
+        moviesDataBase = moviesTotalDataBase
+        removeFilterButtonIsActive = false
+        updateUI()
+        tableView.reloadData()
+    }
+    
+    
+    func updateListMoviesWithFilterYear(yearFilter: String) {
+        do {
+            fetchRequest.predicate = NSPredicate(format: "release_date == \(yearFilter)")
+            moviesDataBase = try managedContext.fetch(fetchRequest)
+            
+            if !moviesDataBase.isEmpty {
+                removeFilterButtonIsActive = true
+                updateUI()
+                tableView.reloadData()
+            }
+            
+        } catch let error as NSError {
+            print("Could not fetch filter. \(error), \(error.userInfo)")
+            
+        }
+    }
+    
+    
+    func updateListMoviesWithFilterGenre(genreFilter: String) {
+        getGenres(genre: genreFilter)
+        
+        if !moviesDataBase.isEmpty {
+            removeFilterButtonIsActive = true
+            updateUI()
+            tableView.reloadData()
+        }
+    }
+    
+    func getGenres (genre: String) {
+        var moviesDataBaseFiltred: [NSManagedObject] = []
+        for movieDB in moviesDataBase {
+            let genresMoviesDB = movieDB.value(forKey: "genresID") as? [String]
+            if let genresMoviesDB = genresMoviesDB {
+                if genresMoviesDB.contains(genre) {
+                    moviesDataBaseFiltred.append(movieDB)
+                }
+            }
+        }
+        print(moviesDataBaseFiltred.count)
+        moviesDataBase = moviesDataBaseFiltred
     }
 }
