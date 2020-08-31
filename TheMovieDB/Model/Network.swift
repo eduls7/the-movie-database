@@ -9,10 +9,6 @@
 import Foundation
 import UIKit
 
-enum NetworkError: Error {
-    case url
-}
-
 class Network {
 
     func fetchMoviesAPI (_ page: Int, completionHandler: @escaping([Films]) -> Void) {

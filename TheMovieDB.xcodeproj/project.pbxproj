@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		F922620C24CB0BFD008DB2CB /* DetailMovieViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F922620B24CB0BFD008DB2CB /* DetailMovieViewController.swift */; };
 		F922621224CEF268008DB2CB /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = F922621124CEF268008DB2CB /* Movie.swift */; };
+		F933BD0324FD697800F4189D /* DataBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F933BD0224FD697800F4189D /* DataBase.swift */; };
 		F9556E2B24EDACBB00D05507 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9556E2A24EDACBB00D05507 /* FilterViewController.swift */; };
 		F9556E2E24EDE53200D05507 /* FilterViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9556E2D24EDE53200D05507 /* FilterViewCell.swift */; };
 		F9660FE024EEEDEB00F31389 /* DateFilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9660FDF24EEEDEB00F31389 /* DateFilterViewController.swift */; };
@@ -32,6 +33,7 @@
 /* Begin PBXFileReference section */
 		F922620B24CB0BFD008DB2CB /* DetailMovieViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailMovieViewController.swift; sourceTree = "<group>"; };
 		F922621124CEF268008DB2CB /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
+		F933BD0224FD697800F4189D /* DataBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBase.swift; sourceTree = "<group>"; };
 		F9556E2A24EDACBB00D05507 /* FilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
 		F9556E2D24EDE53200D05507 /* FilterViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewCell.swift; sourceTree = "<group>"; };
 		F9660FDF24EEEDEB00F31389 /* DateFilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFilterViewController.swift; sourceTree = "<group>"; };
@@ -68,22 +70,63 @@
 		F9556E2C24EDE4F400D05507 /* Filter */ = {
 			isa = PBXGroup;
 			children = (
-				F9556E2A24EDACBB00D05507 /* FilterViewController.swift */,
-				F9556E2D24EDE53200D05507 /* FilterViewCell.swift */,
-				F9660FDF24EEEDEB00F31389 /* DateFilterViewController.swift */,
-				F9660FE124EEF14F00F31389 /* DateFilterTableViewCell.swift */,
-				F9660FE324EF334C00F31389 /* GenresFilterViewController.swift */,
-				F9660FE524EF341500F31389 /* GenresTableViewCell.swift */,
+				F9660FEB24FADE6C00F31389 /* View */,
+				F9660FEC24FADE8100F31389 /* Controller */,
 			);
 			path = Filter;
 			sourceTree = "<group>";
 		};
-		F9BF5D5724D9B68B0046C4D4 /* Network */ = {
+		F9660FE724FADD0600F31389 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				F9BF5D5824D9B68B0046C4D4 /* Network.swift */,
+				F9F0199F24C60C74007805AF /* MoviesViewCell.swift */,
 			);
-			path = Network;
+			path = View;
+			sourceTree = "<group>";
+		};
+		F9660FE824FADD2200F31389 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				F9F0199524C5EBF7007805AF /* MoviesViewController.swift */,
+				F922620B24CB0BFD008DB2CB /* DetailMovieViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		F9660FE924FADE4A00F31389 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				F9F0199B24C5F6CF007805AF /* FavoritesViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		F9660FEA24FADE5400F31389 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				F9F0199924C5F4B3007805AF /* FavoritesMoviesViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		F9660FEB24FADE6C00F31389 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				F9556E2D24EDE53200D05507 /* FilterViewCell.swift */,
+				F9660FE124EEF14F00F31389 /* DateFilterTableViewCell.swift */,
+				F9660FE524EF341500F31389 /* GenresTableViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		F9660FEC24FADE8100F31389 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				F9556E2A24EDACBB00D05507 /* FilterViewController.swift */,
+				F9660FDF24EEEDEB00F31389 /* DateFilterViewController.swift */,
+				F9660FE324EF334C00F31389 /* GenresFilterViewController.swift */,
+			);
+			path = Controller;
 			sourceTree = "<group>";
 		};
 		F9F0197524C4B23E007805AF = {
@@ -108,10 +151,10 @@
 				F9F0198124C4B23E007805AF /* AppDelegate.swift */,
 				F9EB229124D1F5EA005071D5 /* SceneDelegate.swift */,
 				F9F019A224C73D70007805AF /* TabBar */,
+				F9F019A424C7BF74007805AF /* Model */,
 				F9F019A124C73D58007805AF /* Movies */,
 				F9F019A324C73D7E007805AF /* Favorites Movies */,
 				F9556E2C24EDE4F400D05507 /* Filter */,
-				F9BF5D5724D9B68B0046C4D4 /* Network */,
 				F9EB22C924D46F65005071D5 /* TheMovieDB.xcdatamodeld */,
 				F9F0198F24C4B246007805AF /* Info.plist */,
 				F9F0198A24C4B246007805AF /* Assets.xcassets */,
@@ -123,10 +166,8 @@
 		F9F019A124C73D58007805AF /* Movies */ = {
 			isa = PBXGroup;
 			children = (
-				F922620B24CB0BFD008DB2CB /* DetailMovieViewController.swift */,
-				F9F019A424C7BF74007805AF /* Model */,
-				F9F0199524C5EBF7007805AF /* MoviesViewController.swift */,
-				F9F0199F24C60C74007805AF /* MoviesViewCell.swift */,
+				F9660FE724FADD0600F31389 /* View */,
+				F9660FE824FADD2200F31389 /* Controller */,
 			);
 			path = Movies;
 			sourceTree = "<group>";
@@ -142,8 +183,8 @@
 		F9F019A324C73D7E007805AF /* Favorites Movies */ = {
 			isa = PBXGroup;
 			children = (
-				F9F0199924C5F4B3007805AF /* FavoritesMoviesViewController.swift */,
-				F9F0199B24C5F6CF007805AF /* FavoritesViewCell.swift */,
+				F9660FE924FADE4A00F31389 /* View */,
+				F9660FEA24FADE5400F31389 /* Controller */,
 			);
 			path = "Favorites Movies";
 			sourceTree = "<group>";
@@ -153,6 +194,8 @@
 			children = (
 				F922621124CEF268008DB2CB /* Movie.swift */,
 				F9F019A524C7BF9B007805AF /* FilmsJSON.swift */,
+				F9BF5D5824D9B68B0046C4D4 /* Network.swift */,
+				F933BD0224FD697800F4189D /* DataBase.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -237,6 +280,7 @@
 				F9F019A024C60C74007805AF /* MoviesViewCell.swift in Sources */,
 				F9556E2E24EDE53200D05507 /* FilterViewCell.swift in Sources */,
 				F9556E2B24EDACBB00D05507 /* FilterViewController.swift in Sources */,
+				F933BD0324FD697800F4189D /* DataBase.swift in Sources */,
 				F9EB229224D1F5EA005071D5 /* SceneDelegate.swift in Sources */,
 				F9660FE624EF341500F31389 /* GenresTableViewCell.swift in Sources */,
 				F9F0199C24C5F6CF007805AF /* FavoritesViewCell.swift in Sources */,

@@ -15,19 +15,13 @@ protocol UnfavoriteMovieRow: class {
 
 class FavoritesMoviesViewController: UIViewController {
     
-    
-    
     //MARK: - Properties
     let network = Network()
+    let dataBase = DataBase()
     weak var delegate: UnfavoriteMovieRow?
-    var managedContext: NSManagedObjectContext {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        return appDelegate.persistentContainer.viewContext
-    }
-    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Movies")
+
     var moviesDataBase: [NSManagedObject] = []
     var moviesTotalDataBase: [NSManagedObject] = []
-    var fetchResult: [NSManagedObject] = []
     var genresNames: [String] = []
     var genresNamesTotal: [String] = []
     lazy var tableView: UITableView = {
@@ -81,14 +75,9 @@ class FavoritesMoviesViewController: UIViewController {
         super.viewDidLoad()
     
         
-        do {
-            moviesTotalDataBase = try managedContext.fetch(fetchRequest)
-            moviesDataBase = moviesTotalDataBase
-        } catch let error as NSError {
-            print("Could not fetch. \(error), \(error.userInfo)")
-        }
+        moviesTotalDataBase = dataBase.getMoviesDataBase()
+        moviesDataBase = moviesTotalDataBase
         setupUI()
-        //getGenres()
     }
     
     
@@ -193,6 +182,7 @@ extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSou
         
     }
     
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -204,20 +194,10 @@ extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSou
             let id = movie.value(forKeyPath: "id") as? Int
             guard let movieID = id else { return }
             delegate?.unfavoriteMovie(movieID)
-            managedContext.delete(movie)
-            do {
-                fetchRequest.predicate = NSPredicate(format: "id != %i", movieID)
-                moviesTotalDataBase = try managedContext.fetch(fetchRequest)
-            } catch let error as NSError {
-                print("Could not fetch. \(error), \(error.userInfo)")
-                
-            }
-            moviesDataBase.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .fade)
-            do{
-                try managedContext.save()
-            } catch let error as NSError {
-                print("Could not save deletion of object. \(error), \(error.userInfo)")
+            dataBase.removeMovie(movieID) { (movies) in
+                self.moviesTotalDataBase = movies
+                self.moviesDataBase.remove(at: indexPath.row)
+                self.tableView.deleteRows(at: [indexPath], with: .fade)
             }
         }
     }
@@ -228,85 +208,22 @@ extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSou
 extension FavoritesMoviesViewController: DataSourceMovieDelegate {
     
     func insertMovie(_ movie: Movie, _ button: UIButton) {
-        
-        let entityMovie = NSEntityDescription.entity(forEntityName: "Movies", in: managedContext)!
-        let movieNew = NSManagedObject(entity: entityMovie, insertInto: managedContext)
-        var data: Data?
-        
-        
-        guard let poster = movie.poster else { return print("Poster movie with nil value") }
-        
-        
-        self.network.fetchImagesAPI(imageURLString: poster) { (image) in
-            data = image.pngData()
-            movieNew.setValue(data, forKey: "poster")
-            let yearMovie = String(movie.releaseDate.prefix(4))
-            movieNew.setValue(yearMovie, forKey: "release_date")
-            movieNew.setValue(movie.id, forKey: "id")
-            movieNew.setValue(movie.title, forKey: "title")
-            movieNew.setValue(movie.isFav, forKey: "isFav")
-            movieNew.setValue(movie.overview, forKey: "overview")
-            
-            self.network.fetchGenresAPI { (genresReponse) in
-                
-                for genre in genresReponse {
-                    for id in movie.genre {
-                        if id == genre.id {
-                            self.genresNames.append(genre.name)
-                        }
-                    }
-                }
-                
-                let genresNames = self.genresNames as [NSString]
-                movieNew.setValue(genresNames, forKey: "genresID")
-                
-                do{
-                    try self.managedContext.save()
-                    self.genresNames = []
-                    self.moviesTotalDataBase.append(movieNew)
-                    self.moviesDataBase.append(movieNew)
-                    self.tableView.reloadData()
-                    button.isSelected = true
-                    
-                } catch let error as NSError {
-                    print("Could not save new. \(error), \(error.userInfo)")
-                }
-            }
+        dataBase.insertMovie(movie) { (movieNew) in
+            self.moviesDataBase.append(movieNew)
+            self.moviesTotalDataBase.append(movieNew)
+            self.tableView.reloadData()
+            button.isSelected = true
         }
     }
     
     
     func removeMovie(_ movie: Movie, _ button: UIButton) {
         
-        
-        do {
-            fetchRequest.predicate = NSPredicate(format: "id != %i", movie.id)
-            fetchResult = try managedContext.fetch(fetchRequest)
-            moviesDataBase = fetchResult
-            moviesTotalDataBase = fetchResult
-            tableView.reloadData()
-            fetchResult = []
-        } catch let error as NSError {
-            print("Could not delete from movieDataBase. \(error), \(error.userInfo)")
-        }
-        
-        do{
-            fetchRequest.predicate = NSPredicate(format: "id == %i", movie.id)
-            fetchResult = try managedContext.fetch(fetchRequest)
-            if fetchResult.first != nil {
-                managedContext.delete(fetchResult.first!)
-            }
-            
-            do{
-                try managedContext.save()
-                button.isSelected = false
-                
-            } catch let error as NSError {
-                print("Could not save movie deleted. \(error), \(error.userInfo)")
-            }
-        } catch let error as NSError {
-            print("Could not fetch. \(error), \(error.userInfo)")
-            
+        dataBase.removeMovie(movie.id) { (movies) in
+            self.moviesTotalDataBase = movies
+            self.moviesDataBase = movies
+            self.tableView.reloadData()
+            button.isSelected = false
         }
     }
 }
@@ -329,19 +246,12 @@ extension FavoritesMoviesViewController: FilterMovies {
     
     
     func updateListMoviesWithFilterYear(yearFilter: String) {
-        do {
-            fetchRequest.predicate = NSPredicate(format: "release_date == \(yearFilter)")
-            moviesDataBase = try managedContext.fetch(fetchRequest)
-            
-            if !moviesDataBase.isEmpty {
-                removeFilterButtonIsActive = true
-                updateUI()
-                tableView.reloadData()
-            }
-            
-        } catch let error as NSError {
-            print("Could not fetch filter. \(error), \(error.userInfo)")
-            
+        
+        if let movies = dataBase.getMovie(withYear: yearFilter) {
+            moviesDataBase = movies
+            removeFilterButtonIsActive = true
+            updateUI()
+            tableView.reloadData()
         }
     }
     

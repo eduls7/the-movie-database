@@ -13,23 +13,19 @@ protocol DataSourceMovieDelegate: class {
     func insertMovie (_ movie: Movie, _ button: UIButton)
     func removeMovie (_ movie: Movie, _ button: UIButton)
 }
-class MoviesViewController: UIViewController, UnfavoriteMovieRow, UISearchResultsUpdating {
+class MoviesViewController: UIViewController, UnfavoriteMovieRow {
     
     
     //MARK: - Properties
     let network = Network()
+    let dataBase = DataBase()
     var page = 1
     var selectedIndexPath: IndexPath?
     var popularMoviesTotal: [Movie] = []
     var popularMovies: [Movie] = []
     weak var delegate: DataSourceMovieDelegate?
-    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Movies")
-    var moviesDataBase: [NSManagedObject] = []
     var isMoreDataLoading = false
-    var managedContext: NSManagedObjectContext {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        return appDelegate.persistentContainer.viewContext
-    }
+
     
     lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewLayout())
@@ -50,31 +46,8 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow, UISearchResult
     //MARK: - Initializers
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        fetchMoviesDataBase()
         fetchMovies()
-        //setupUI()
-                
     }
-    
-    func updateSearchResults(for searchController: UISearchController) {
-        let totalMoviesObject = popularMovies.count
-        popularMovies = popularMoviesTotal
-        
-        if let searchText = searchController.searchBar.text, searchText != "" {
-            
-            popularMovies = searchText.isEmpty ? popularMoviesTotal: popularMoviesTotal.filter { return $0.title.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil }
-        
-        }
-        
-        if totalMoviesObject != popularMovies.count  {
-            collectionView.reloadData()
-        }
-        
-    }
-
-    
-    
 }
 
 // MARK: - UI Setup
@@ -84,11 +57,13 @@ extension MoviesViewController {
         if #available(iOS 13.6, *) {
             overrideUserInterfaceStyle = .light
         }
-        setupUINavigationBarController()
+        self.view.backgroundColor = .white
         self.view.addSubview(collectionView)
+        setupUINavigationBarController()
+        
 
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 10),
             collectionView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             collectionView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
             collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
@@ -126,6 +101,25 @@ extension MoviesViewController {
             navigationController.navigationBar.standardAppearance = navigationBarAppearence
             searchController.obscuresBackgroundDuringPresentation = false
         }
+    }
+}
+
+//MARK: - Search
+extension MoviesViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        let totalMoviesObject = popularMovies.count
+        popularMovies = popularMoviesTotal
+        
+        if let searchText = searchController.searchBar.text, searchText != "" {
+            
+            popularMovies = searchText.isEmpty ? popularMoviesTotal: popularMoviesTotal.filter { return $0.title.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil }
+        
+        }
+        
+        if totalMoviesObject != popularMovies.count  {
+            collectionView.reloadData()
+        }
+        
     }
 }
 
@@ -212,8 +206,6 @@ extension MoviesViewController: FavoriteMovieDelegate {
             }
             
             self.collectionView.reloadItems(at: [indexPath])
-            
-            
         }
     }
 }
@@ -221,38 +213,18 @@ extension MoviesViewController: FavoriteMovieDelegate {
 //MARK: - DATABASE Functions
 extension MoviesViewController {
     
-    func fetchMoviesDataBase(){
-        do{
-            moviesDataBase = try managedContext.fetch(fetchRequest)
-        } catch let error as NSError {
-            print("Could not fetch. \(error), \(error.userInfo)")
-        }
-    }
-    
     func setupMoviesFavs () {
-        
-        for movieDB in moviesDataBase {
-            let movieID = movieDB.value(forKeyPath: "id") as? Int
-            var index = 0
-            for movie in popularMoviesTotal {
-                if movieID == movie.id {
-                    popularMoviesTotal[index].isFav = true
-                }
-                index += 1
-            }
-            
-        }
+        dataBase.setupMoviesFavs(movies: &popularMovies)
     }
     
     func unfavoriteMovie(_ id: Int) {
-        var index = 0
-        for movie in popularMoviesTotal {
-            if movie.id == id {
-                popularMoviesTotal[index].isFav = false
-                popularMovies[index].isFav = false
-                collectionView.reloadData()
-            }
-            index += 1
+        
+        if let index = popularMoviesTotal.firstIndex(where: { $0.id == id}) {
+            popularMoviesTotal[index].isFav = false
+            popularMovies[index].isFav = false
+            collectionView.reloadData()
+        } else {
+            print("Unable to unfavorite movie with index: \(id)")
         }
     }
 }
@@ -263,12 +235,11 @@ extension MoviesViewController {
         network.fetchMoviesAPI(page) { (films) in
             
             for film in films {
-                
                 let movie = Movie(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
                 self.popularMoviesTotal.append(movie)
             }
-            self.setupMoviesFavs()
             self.popularMovies = self.popularMoviesTotal
+            self.setupMoviesFavs()
             self.setupUI()
         }
         
