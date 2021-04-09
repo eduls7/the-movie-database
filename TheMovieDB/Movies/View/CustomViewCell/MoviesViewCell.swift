@@ -70,8 +70,26 @@ class MoviesViewCell: UICollectionViewCell {
     
 }
 
-// MARK: - UI Setup
+// MARK: - Custom Methods
 extension MoviesViewCell {
+    
+    func setupViewProperties(with movie: MovieViewModel) {
+        titleLabel.text = movie.title
+        if movie.isFav {
+            favoriteIconImage.image = UIImage(named: "favorite_full_icon")
+        }else{
+            favoriteIconImage.image = UIImage(named: "favorite_gray_icon")
+        }
+        if let poster = movie.poster  {
+            getImages(imageURL: poster)
+        }
+    }
+    
+    func getImages (imageURL: String) {
+        Network.shared.fetchImagesAPI(imageURLString: imageURL) { (image) in
+            self.movieImage.image = image
+        }
+    }
     
     private func setupUI() {
         

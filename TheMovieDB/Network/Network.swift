@@ -10,8 +10,9 @@ import Foundation
 import UIKit
 
 class Network {
+    static public let shared = Network()
 
-    func fetchMoviesAPI (_ page: Int, completionHandler: @escaping([Films]) -> Void) {
+    func fetchMoviesAPI (_ page: Int, completionHandler: @escaping([Film]) -> Void) {
         let pageRequest = String(page)
         
         let apiKEY = "001b2963f87a5986bb263777245cc788"
@@ -25,6 +26,7 @@ class Network {
             if error == nil && data != nil {
                 let decoder = JSONDecoder()
                 do{
+                 
                     let filmsResponse = try decoder.decode(MovieResponse.self, from: data!)
                     completionHandler(filmsResponse.films)
                 }

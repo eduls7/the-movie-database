@@ -10,6 +10,7 @@ import CoreData
 import UIKit
 
 class DataBase {
+    static public let shared = DataBase()
     var managedContext: NSManagedObjectContext {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         return appDelegate.persistentContainer.viewContext
@@ -18,7 +19,6 @@ class DataBase {
     let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Movies")
     var moviesDataBase: [NSManagedObject] = []
     var fetchResult: [NSManagedObject] = []
-    let network = Network()
     var genresNames: [String] = []
     
     init() {
@@ -57,7 +57,7 @@ class DataBase {
         return nil
     }
     
-    func setupMoviesFavs (movies: inout [Movie]) {
+    func setupMoviesFavs (movies: inout [MovieViewModel]) {
         
         for movieDB in moviesDataBase {
             let movieID = movieDB.value(forKeyPath: "id") as? Int
@@ -71,7 +71,7 @@ class DataBase {
         }
     }
     
-    func insertMovie(_ movie: Movie, completionHandler:  @escaping(NSManagedObject) -> Void)  {
+    func insertMovie(_ movie: MovieViewModel, completionHandler:  @escaping(NSManagedObject) -> Void)  {
         let entityMovie = NSEntityDescription.entity(forEntityName: "Movies", in: self.managedContext)!
         let movieNew = NSManagedObject(entity: entityMovie, insertInto: managedContext)
         var data: Data?
@@ -80,7 +80,7 @@ class DataBase {
         guard let poster = movie.poster else { return print("Poster movie with nil value") }
         
         
-        self.network.fetchImagesAPI(imageURLString: poster) { (image) in
+        Network.shared.fetchImagesAPI(imageURLString: poster) { (image) in
             data = image.pngData()
             movieNew.setValue(data, forKey: "poster")
             let yearMovie = String(movie.releaseDate.prefix(4))
@@ -90,7 +90,7 @@ class DataBase {
             movieNew.setValue(movie.isFav, forKey: "isFav")
             movieNew.setValue(movie.overview, forKey: "overview")
             
-            self.network.fetchGenresAPI { (genresReponse) in
+            Network.shared.fetchGenresAPI { (genresReponse) in
                 
                 for genre in genresReponse {
                     for id in movie.genre {

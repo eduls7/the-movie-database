@@ -85,6 +85,139 @@ class FavoritesMoviesViewController: UIViewController {
 
 
 
+
+
+// MARK: - UITableviewViewDelegate & Data Source
+extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return moviesDataBase.count
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "FavoritesTableViewCell", for: indexPath) as! FavoritesViewCell
+        
+        let movie = moviesDataBase[indexPath.row]
+        
+        
+        cell.titleLabel.text = movie.value(forKeyPath: "title") as? String
+        cell.releaseDate.text = movie.value(forKeyPath: "release_date") as? String
+        
+        
+        cell.overview.text = movie.value(forKeyPath: "overview") as? String
+        let data = movie.value(forKeyPath: "poster") as? Data
+        
+        if let data = data {
+            cell.movieImage.image = UIImage(data: data)
+        }
+        return cell
+        
+    }
+    
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        
+        if editingStyle == .delete {
+            let movie = moviesDataBase[indexPath.row]
+            let id = movie.value(forKeyPath: "id") as? Int
+            guard let movieID = id else { return }
+            delegate?.unfavoriteMovie(movieID)
+            dataBase.removeMovie(movieID) { (movies) in
+                self.moviesTotalDataBase = movies
+                self.moviesDataBase.remove(at: indexPath.row)
+                self.tableView.deleteRows(at: [indexPath], with: .fade)
+            }
+        }
+    }
+}
+
+
+
+extension FavoritesMoviesViewController: DataSourceMovieDelegate {
+    
+    func insertMovie(_ movie: MovieViewModel, _ button: UIButton) {
+        dataBase.insertMovie(movie) { (movieNew) in
+            self.moviesDataBase.append(movieNew)
+            self.moviesTotalDataBase.append(movieNew)
+            self.tableView.reloadData()
+            button.isSelected = true
+        }
+    }
+    
+    
+    func removeMovie(_ movie: MovieViewModel, _ button: UIButton) {
+        
+        dataBase.removeMovie(movie.id) { (movies) in
+            self.moviesTotalDataBase = movies
+            self.moviesDataBase = movies
+            self.tableView.reloadData()
+            button.isSelected = false
+        }
+    }
+}
+
+extension FavoritesMoviesViewController: FilterMovies {
+    //MARK: - Filter Movie Protocol
+    @objc func filterMovies (button: UIButton) {
+        let filterViewController = FilterViewController()
+        filterViewController.delegate = self
+        filterViewController.moviesDataBase = moviesDataBase
+        self.navigationController?.pushViewController(filterViewController, animated: true)
+    }
+    
+    @objc func removeFilterMovies (button: UIButton) {
+        moviesDataBase = moviesTotalDataBase
+        removeFilterButtonIsActive = false
+        updateUI()
+        tableView.reloadData()
+    }
+    
+    
+    func updateListMoviesWithFilterYear(yearFilter: String) {
+        
+        if let movies = dataBase.getMovie(withYear: yearFilter) {
+            moviesDataBase = movies
+            removeFilterButtonIsActive = true
+            updateUI()
+            tableView.reloadData()
+        }
+    }
+    
+    
+    func updateListMoviesWithFilterGenre(genreFilter: String) {
+        getGenres(genre: genreFilter)
+        
+        if !moviesDataBase.isEmpty {
+            removeFilterButtonIsActive = true
+            updateUI()
+            tableView.reloadData()
+        }
+    }
+    
+    func getGenres (genre: String) {
+        var moviesDataBaseFiltred: [NSManagedObject] = []
+        for movieDB in moviesDataBase {
+            let genresMoviesDB = movieDB.value(forKey: "genresID") as? [String]
+            if let genresMoviesDB = genresMoviesDB {
+                if genresMoviesDB.contains(genre) {
+                    moviesDataBaseFiltred.append(movieDB)
+                }
+            }
+        }
+        print(moviesDataBaseFiltred.count)
+        moviesDataBase = moviesDataBaseFiltred
+    }
+}
+
 // MARK: - UI Setup
 extension FavoritesMoviesViewController {
     
@@ -148,135 +281,5 @@ extension FavoritesMoviesViewController {
         self.navigationItem.title = "Favorites"
         self.navigationController?.navigationBar.barTintColor = UIColor(red: 247/255, green: 206/255, blue: 91/255, alpha: 1)
         navigationItem.rightBarButtonItem = filterBarButton
-    }
-}
-
-// MARK: - UICollectionViewDelegate & Data Source
-extension FavoritesMoviesViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return moviesDataBase.count
-    }
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "FavoritesTableViewCell", for: indexPath) as! FavoritesViewCell
-        
-        let movie = moviesDataBase[indexPath.row]
-        
-        
-        cell.titleLabel.text = movie.value(forKeyPath: "title") as? String
-        cell.releaseDate.text = movie.value(forKeyPath: "release_date") as? String
-        
-        
-        cell.overview.text = movie.value(forKeyPath: "overview") as? String
-        let data = movie.value(forKeyPath: "poster") as? Data
-        
-        if let data = data {
-            cell.movieImage.image = UIImage(data: data)
-        }
-        return cell
-        
-    }
-    
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        
-        if editingStyle == .delete {
-            let movie = moviesDataBase[indexPath.row]
-            let id = movie.value(forKeyPath: "id") as? Int
-            guard let movieID = id else { return }
-            delegate?.unfavoriteMovie(movieID)
-            dataBase.removeMovie(movieID) { (movies) in
-                self.moviesTotalDataBase = movies
-                self.moviesDataBase.remove(at: indexPath.row)
-                self.tableView.deleteRows(at: [indexPath], with: .fade)
-            }
-        }
-    }
-}
-
-
-
-extension FavoritesMoviesViewController: DataSourceMovieDelegate {
-    
-    func insertMovie(_ movie: Movie, _ button: UIButton) {
-        dataBase.insertMovie(movie) { (movieNew) in
-            self.moviesDataBase.append(movieNew)
-            self.moviesTotalDataBase.append(movieNew)
-            self.tableView.reloadData()
-            button.isSelected = true
-        }
-    }
-    
-    
-    func removeMovie(_ movie: Movie, _ button: UIButton) {
-        
-        dataBase.removeMovie(movie.id) { (movies) in
-            self.moviesTotalDataBase = movies
-            self.moviesDataBase = movies
-            self.tableView.reloadData()
-            button.isSelected = false
-        }
-    }
-}
-
-extension FavoritesMoviesViewController: FilterMovies {
-    //MARK: - Filter Movie Protocol
-    @objc func filterMovies (button: UIButton) {
-        let filterViewController = FilterViewController()
-        filterViewController.delegate = self
-        filterViewController.moviesDataBase = moviesDataBase
-        self.navigationController?.pushViewController(filterViewController, animated: true)
-    }
-    
-    @objc func removeFilterMovies (button: UIButton) {
-        moviesDataBase = moviesTotalDataBase
-        removeFilterButtonIsActive = false
-        updateUI()
-        tableView.reloadData()
-    }
-    
-    
-    func updateListMoviesWithFilterYear(yearFilter: String) {
-        
-        if let movies = dataBase.getMovie(withYear: yearFilter) {
-            moviesDataBase = movies
-            removeFilterButtonIsActive = true
-            updateUI()
-            tableView.reloadData()
-        }
-    }
-    
-    
-    func updateListMoviesWithFilterGenre(genreFilter: String) {
-        getGenres(genre: genreFilter)
-        
-        if !moviesDataBase.isEmpty {
-            removeFilterButtonIsActive = true
-            updateUI()
-            tableView.reloadData()
-        }
-    }
-    
-    func getGenres (genre: String) {
-        var moviesDataBaseFiltred: [NSManagedObject] = []
-        for movieDB in moviesDataBase {
-            let genresMoviesDB = movieDB.value(forKey: "genresID") as? [String]
-            if let genresMoviesDB = genresMoviesDB {
-                if genresMoviesDB.contains(genre) {
-                    moviesDataBaseFiltred.append(movieDB)
-                }
-            }
-        }
-        print(moviesDataBaseFiltred.count)
-        moviesDataBase = moviesDataBaseFiltred
     }
 }

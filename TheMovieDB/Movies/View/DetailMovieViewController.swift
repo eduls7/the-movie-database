@@ -135,6 +135,42 @@ class DetailMovieViewController: UIViewController {
     
 
     //MARK: - SetupUI
+    
+    func setupViewProperties(with movie: MovieViewModel) {
+        titleMovieLabel.text = movie.title
+        releaseDateMovieLabel.text = String(movie.releaseDate.prefix(4))
+        overviewMovieLabel.text = movie.overview
+        
+        if let poster = movie.poster  {
+            getImages(imageURL: poster)
+        }
+        getGenres(genresMoviesID: movie.genre)
+        
+        if movie.isFav {
+            favoriteButtom.isSelected = true
+        } else {
+            favoriteButtom.isSelected = false
+        }
+    }
+    
+    func getImages (imageURL: String) {
+        Network.shared.fetchImagesAPI(imageURLString: imageURL) { (image) in
+            self.movieImage.image = image
+        }
+    }
+    
+    func getGenres (genresMoviesID: [Int]) {
+        var namesGenres: [String] = []
+        Network.shared.fetchGenresAPI { (genres) in
+            for id in genres {
+                for genreID in genresMoviesID where id.id == genreID {
+                    namesGenres.append(id.name)
+                    self.genreMovieLabel.text = namesGenres.joined(separator: ", ")
+                }
+            }
+        }
+    }
+    
     func setupUI () {
         self.navigationItem.largeTitleDisplayMode = .never
         self.navigationItem.title = "Movie"
