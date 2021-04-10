@@ -27,8 +27,9 @@ class MoviesPresenter {
         Network.shared.fetchMoviesAPI(page) { (films) in
             
             for film in films {
-                self.popularMovies.append(MovieViewModel(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false))
+                self.popularMoviesTotal.append(self.insertMovie(film))
             }
+            self.popularMovies = self.popularMoviesTotal
             self.setupMoviesFavs()
             self.delegate?.reloadData()
         }
@@ -39,8 +40,7 @@ class MoviesPresenter {
             self.isMoreDataLoading = false
             
             for film in films {
-                let movie = MovieViewModel(id: film.id, title: film.title, overview: film.overview, releaseDate: film.date, poster: film.poster, genre: film.genre, isFav: false)
-                self.popularMoviesTotal.append(movie)
+                self.popularMoviesTotal.append(self.insertMovie(film))
             }
             self.popularMovies = self.popularMoviesTotal
             self.setupMoviesFavs()
@@ -50,6 +50,18 @@ class MoviesPresenter {
     
     func setupMoviesFavs () {
         DataBase.shared.setupMoviesFavs(movies: &popularMovies)
+    }
+    
+    private func insertMovie(_ film: Film) -> MovieViewModel {
+        let movieViewModel = MovieViewModel(id: film.id,
+                                    title: film.title,
+                                    overview: film.overview,
+                                    releaseDate: film.date,
+                                    poster: film.poster,
+                                    genre: film.genre,
+                                    isFav: false)
+        
+        return movieViewModel
     }
     
 }

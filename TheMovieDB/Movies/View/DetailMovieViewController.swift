@@ -13,109 +13,19 @@ protocol FavoriteMovieDelegate: class {
 }
 
 class DetailMovieViewController: UIViewController {
-    
-    
     //MARK: - Properties
     weak var delegate: FavoriteMovieDelegate?
-    
-    
-    lazy var scrollView: UIScrollView = {
-        
-        let scrollView = UIScrollView()
-        scrollView.backgroundColor = .white
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        return scrollView
-    }()
-    
-    lazy var contentView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    lazy var movieImage: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = UIView.ContentMode.scaleToFill
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        return imageView
-    }()
-    
-    lazy var lineSeparatorView1: UIView = {
-        let view = UIView(frame: .zero)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray
-        return view
-    }()
-    
-    lazy var lineSeparatorView2: UIView = {
-        let view = UIView(frame: .zero)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray
-        return view
-    }()
-    
-    lazy var lineSeparatorView3: UIView = {
-        let view = UIView(frame: .zero)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray
-        return view
-    }()
-    
-    lazy var titleMovieLabel: UILabel = {
-        let label = UILabel(frame: .zero)
-        label.font = UIFont(name: "Helvetica Neue", size: 17)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.numberOfLines = 0
-        
-        return label
-    }()
-    
-    lazy var releaseDateMovieLabel: UILabel = {
-        let label = UILabel(frame: .zero)
-        label.font = UIFont(name: "Helvetica Neue", size: 17)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.numberOfLines = 1
-        
-        return label
-    }()
-    
-    lazy var genreMovieLabel: UILabel = {
-        let label = UILabel(frame: .zero)
-        label.font = UIFont(name: "Helvetica Neue", size: 17)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.numberOfLines = 0
-        
-        return label
-    }()
-    
-    lazy var overviewMovieLabel: UILabel = {
-        let label = UILabel(frame: .zero)
-        label.font = UIFont(name: "Helvetica Neue", size: 17)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.numberOfLines = 0
-        
-        return label
-    }()
-    
-    lazy var favoriteButtom: UIButton = {
-        let favoriteEmpyImage = UIImage(named: "favorite_empty_icon")
-        let favoriteSelectedImage = UIImage(named: "favorite_full_icon")
-        let button = UIButton()
-        button.setImage(favoriteEmpyImage, for: .normal)
-        button.setImage(favoriteSelectedImage, for: .selected)
-        button.addTarget(self, action: #selector(DetailMovieViewController.markFavoriteButtom(buttom:)), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
+    let shareView = DetailMovieView()
+
     //MARK: - Initializers
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
         setupUI()
-        
+    }
+    
+    override func loadView() {
+        view = shareView
     }
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
@@ -133,29 +43,26 @@ class DetailMovieViewController: UIViewController {
         delegate?.updateFavoriteMovie(buttom)
     }
     
-
-    //MARK: - SetupUI
-    
+    // MARK: - SetupUI
     func setupViewProperties(with movie: MovieViewModel) {
-        titleMovieLabel.text = movie.title
-        releaseDateMovieLabel.text = String(movie.releaseDate.prefix(4))
-        overviewMovieLabel.text = movie.overview
-        
+        shareView.titleMovieLabel.text = movie.title
+        shareView.releaseDateMovieLabel.text = String(movie.releaseDate.prefix(4))
+        shareView.overviewMovieLabel.text = movie.overview
         if let poster = movie.poster  {
             getImages(imageURL: poster)
         }
         getGenres(genresMoviesID: movie.genre)
         
         if movie.isFav {
-            favoriteButtom.isSelected = true
+            shareView.favoriteButtom.isSelected = true
         } else {
-            favoriteButtom.isSelected = false
+            shareView.favoriteButtom.isSelected = false
         }
     }
     
     func getImages (imageURL: String) {
         Network.shared.fetchImagesAPI(imageURLString: imageURL) { (image) in
-            self.movieImage.image = image
+            self.shareView.movieImage.image = image
         }
     }
     
@@ -165,83 +72,15 @@ class DetailMovieViewController: UIViewController {
             for id in genres {
                 for genreID in genresMoviesID where id.id == genreID {
                     namesGenres.append(id.name)
-                    self.genreMovieLabel.text = namesGenres.joined(separator: ", ")
+                    self.shareView.genreMovieLabel.text = namesGenres.joined(separator: ", ")
                 }
             }
         }
     }
     
-    func setupUI () {
+    private func setupUI() {
         self.navigationItem.largeTitleDisplayMode = .never
         self.navigationItem.title = "Movie"
-        self.view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(movieImage)
-        contentView.addSubview(lineSeparatorView1)
-        contentView.addSubview(lineSeparatorView2)
-        contentView.addSubview(lineSeparatorView3)
-        contentView.addSubview(releaseDateMovieLabel)
-        contentView.addSubview(genreMovieLabel)
-        contentView.addSubview(overviewMovieLabel)
-        contentView.addSubview(favoriteButtom)
-        contentView.addSubview(titleMovieLabel)
-        
-        NSLayoutConstraint.activate([
-            
-            scrollView.widthAnchor.constraint(equalTo: self.view.widthAnchor),
-            scrollView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
-            
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            
-            
-            movieImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            movieImage.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -10),
-            movieImage.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 10),
-            //movieImage.heightAnchor.constraint(equalToConstant: 320),
-            
-            lineSeparatorView1.heightAnchor.constraint(equalToConstant: 0.5),
-            lineSeparatorView1.topAnchor.constraint(equalTo: movieImage.bottomAnchor, constant: 70),
-            lineSeparatorView1.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: 0),
-            lineSeparatorView1.leftAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leftAnchor, constant: 10),
-            
-            titleMovieLabel.bottomAnchor.constraint(equalTo: lineSeparatorView1.topAnchor, constant: -10),
-            titleMovieLabel.leadingAnchor.constraint(equalTo: lineSeparatorView1.leadingAnchor, constant: 0),
-            titleMovieLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -35),
-            
-            favoriteButtom.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
-            favoriteButtom.bottomAnchor.constraint(equalTo: lineSeparatorView1.bottomAnchor, constant: -10),
-
-            
-            lineSeparatorView2.heightAnchor.constraint(equalToConstant: 0.5),
-            lineSeparatorView2.topAnchor.constraint(equalTo: lineSeparatorView1.bottomAnchor, constant: 60),
-            lineSeparatorView2.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: 0),
-            lineSeparatorView2.leftAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leftAnchor, constant: 10),
-            
-            
-            releaseDateMovieLabel.bottomAnchor.constraint(equalTo: lineSeparatorView2.topAnchor, constant: -10),
-            releaseDateMovieLabel.leadingAnchor.constraint(equalTo: lineSeparatorView2.leadingAnchor, constant: 0),
-            
-            
-            lineSeparatorView3.heightAnchor.constraint(equalToConstant: 0.5),
-            lineSeparatorView3.topAnchor.constraint(equalTo: lineSeparatorView2.bottomAnchor, constant: 60),
-            lineSeparatorView3.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: 0),
-            lineSeparatorView3.leftAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leftAnchor, constant: 10),
-            
-            genreMovieLabel.bottomAnchor.constraint(equalTo: lineSeparatorView3.topAnchor, constant: -10),
-            genreMovieLabel.leadingAnchor.constraint(equalTo: lineSeparatorView3.leadingAnchor, constant: 0),
-            genreMovieLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
-            
-            
-            overviewMovieLabel.topAnchor.constraint(equalTo: lineSeparatorView3.topAnchor, constant: 10),
-            overviewMovieLabel.leftAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leftAnchor, constant: 10),
-            overviewMovieLabel.rightAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.rightAnchor, constant: -10),
-            overviewMovieLabel.bottomAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.bottomAnchor)
-            
-            
-        ])
     }
     
 }

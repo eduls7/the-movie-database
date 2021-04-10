@@ -15,9 +15,7 @@ protocol DataSourceMovieDelegate: class {
 }
 class MoviesViewController: UIViewController, UnfavoriteMovieRow {
     // MARK: - Properties
-    var page = 1
     var selectedIndexPath: IndexPath?
-    var popularMoviesTotal: [MovieViewModel] = []
     weak var delegate: DataSourceMovieDelegate?
     let presenter: MoviesPresenter
 
@@ -40,6 +38,7 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow {
     // MARK: - Initializers
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.presenter.delegate = self
         setupUI()
     }
     
@@ -57,13 +56,11 @@ class MoviesViewController: UIViewController, UnfavoriteMovieRow {
 extension MoviesViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         let totalMoviesObject = presenter.popularMovies.count
-        presenter.popularMovies = popularMoviesTotal
+        presenter.popularMovies = presenter.popularMoviesTotal
         
         if let searchText = searchController.searchBar.text, searchText != "" {
-            
-            presenter.popularMovies = searchText.isEmpty ? popularMoviesTotal: popularMoviesTotal.filter { return $0.title.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil }
+            presenter.popularMovies = searchText.isEmpty ? presenter.popularMoviesTotal: presenter.popularMoviesTotal.filter { return $0.title.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil }
         }
-        
         if totalMoviesObject != presenter.popularMovies.count  {
             collectionView.reloadData()
         }
@@ -84,7 +81,6 @@ extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSo
         return cell
     }
     
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let detailMovieViewController = DetailMovieViewController()
         detailMovieViewController.setupViewProperties(with: presenter.popularMovies[indexPath.row])
@@ -93,29 +89,21 @@ extension MoviesViewController: UICollectionViewDelegate, UICollectionViewDataSo
         selectedIndexPath = indexPath
         self.navigationController?.pushViewController(detailMovieViewController, animated: true)
     }
-    
 }
 
 // MARK: - Favorite Delegate
 extension MoviesViewController: FavoriteMovieDelegate {
-    
     func updateFavoriteMovie(_ button: UIButton) {
-    
         if let indexPath = selectedIndexPath {
-            
-            
             if presenter.popularMovies[indexPath.row].isFav == true {
-                
                 presenter.popularMovies[indexPath.row].isFav = false
-                popularMoviesTotal[indexPath.row].isFav = false
+                presenter.popularMoviesTotal[indexPath.row].isFav = false
                 delegate?.removeMovie(presenter.popularMovies[indexPath.row], button)
-                
             } else {
                 presenter.popularMovies[indexPath.row].isFav = true
-                popularMoviesTotal[indexPath.row].isFav = true
+                presenter.popularMoviesTotal[indexPath.row].isFav = true
                 delegate?.insertMovie(presenter.popularMovies[indexPath.row], button)
             }
-            
             self.collectionView.reloadItems(at: [indexPath])
         }
     }
@@ -124,8 +112,8 @@ extension MoviesViewController: FavoriteMovieDelegate {
 // MARK: - DATABASE Functions
 extension MoviesViewController {
     func unfavoriteMovie(_ id: Int) {
-        if let index = popularMoviesTotal.firstIndex(where: { $0.id == id}) {
-            popularMoviesTotal[index].isFav = false
+        if let index = presenter.popularMoviesTotal.firstIndex(where: { $0.id == id}) {
+            presenter.popularMoviesTotal[index].isFav = false
             presenter.popularMovies[index].isFav = false
             collectionView.reloadData()
         } else {
@@ -144,8 +132,8 @@ extension MoviesViewController {
             // When the user has scrolled past the threshold, start requesting
             if(scrollView.contentOffset.y > scrollOffsetThreshold && collectionView.isDragging) {
                 presenter.isMoreDataLoading = true
-                if page <= 499 {
-                    page += 1
+                if presenter.page <= 499 {
+                    presenter.page += 1
                     presenter.loadMoreMovies()
                 }
             }
@@ -198,10 +186,8 @@ extension MoviesViewController {
     func setupUINavigationBarController () {
         
         if let navigationController = self.navigationController {
-            
             let navigationBarAppearence = UINavigationBarAppearance()
             navigationBarAppearence.backgroundColor = UIColor(red: 247/255, green: 206/255, blue: 91/255, alpha: 1)
-            
             self.navigationItem.title = "Movies"
             navigationController.navigationBar.prefersLargeTitles = true
             navigationItem.searchController = searchController

@@ -17,6 +17,7 @@
 		F9660FE424EF334C00F31389 /* GenresFilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9660FE324EF334C00F31389 /* GenresFilterViewController.swift */; };
 		F9660FE624EF341500F31389 /* GenresTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9660FE524EF341500F31389 /* GenresTableViewCell.swift */; };
 		F9A49071261D258100EF2B7A /* MoviesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A49070261D258100EF2B7A /* MoviesPresenter.swift */; };
+		F9A490792621199900EF2B7A /* DetailMovieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A490782621199900EF2B7A /* DetailMovieView.swift */; };
 		F9BF5D5924D9B68C0046C4D4 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9BF5D5824D9B68B0046C4D4 /* Network.swift */; };
 		F9EB229224D1F5EA005071D5 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9EB229124D1F5EA005071D5 /* SceneDelegate.swift */; };
 		F9EB22CB24D46F65005071D5 /* TheMovieDB.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F9EB22C924D46F65005071D5 /* TheMovieDB.xcdatamodeld */; };
@@ -42,6 +43,7 @@
 		F9660FE324EF334C00F31389 /* GenresFilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenresFilterViewController.swift; sourceTree = "<group>"; };
 		F9660FE524EF341500F31389 /* GenresTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenresTableViewCell.swift; sourceTree = "<group>"; };
 		F9A49070261D258100EF2B7A /* MoviesPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesPresenter.swift; sourceTree = "<group>"; };
+		F9A490782621199900EF2B7A /* DetailMovieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailMovieView.swift; sourceTree = "<group>"; };
 		F9BF5D5824D9B68B0046C4D4 /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		F9EB229124D1F5EA005071D5 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		F9EB22CA24D46F65005071D5 /* TheMovieDB.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TheMovieDB.xcdatamodel; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				F9A49073261FF32200EF2B7A /* CustomViewCell */,
+				F9A4907B262132CA00EF2B7A /* CustomView */,
 				F9F0199524C5EBF7007805AF /* MoviesViewController.swift */,
 				F922620B24CB0BFD008DB2CB /* DetailMovieViewController.swift */,
 			);
@@ -138,6 +141,14 @@
 				F9F0199F24C60C74007805AF /* MoviesViewCell.swift */,
 			);
 			path = CustomViewCell;
+			sourceTree = "<group>";
+		};
+		F9A4907B262132CA00EF2B7A /* CustomView */ = {
+			isa = PBXGroup;
+			children = (
+				F9A490782621199900EF2B7A /* DetailMovieView.swift */,
+			);
+			path = CustomView;
 			sourceTree = "<group>";
 		};
 		F9ADFEA6250999E0000CBF44 /* DataBase */ = {
@@ -300,6 +311,7 @@
 				F9F019A624C7BF9C007805AF /* FilmsJSON.swift in Sources */,
 				F9F0199824C5F11E007805AF /* TabBarController.swift in Sources */,
 				F9BF5D5924D9B68C0046C4D4 /* Network.swift in Sources */,
+				F9A490792621199900EF2B7A /* DetailMovieView.swift in Sources */,
 				F9660FE024EEEDEB00F31389 /* DateFilterViewController.swift in Sources */,
 				F9F0199624C5EBF7007805AF /* MoviesViewController.swift in Sources */,
 				F9F0198224C4B23E007805AF /* AppDelegate.swift in Sources */,
@@ -494,7 +506,7 @@
 				F9F0199124C4B246007805AF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		F9F0199224C4B246007805AF /* Build configuration list for PBXNativeTarget "TheMovieDB" */ = {
 			isa = XCConfigurationList;
@@ -503,7 +515,7 @@
 				F9F0199424C4B246007805AF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 
